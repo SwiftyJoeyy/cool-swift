@@ -19,7 +19,8 @@ let package = Package(
         ),
         .testTarget(
             name: "LexingTests",
-            dependencies: ["Lexing"]
+            dependencies: ["Lexing"],
+            resources: [.copy("Resources")]
         ),
     ]
 )
