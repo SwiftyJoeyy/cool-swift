@@ -1,41 +1,33 @@
 import Testing
+import Foundation
 @testable import Lexing
 
 @Test func example() async throws {
-    let string = """
-    8328239823992 "heriuwhehriuwhwiorw"
-    """
+    let url = try #require(
+        Bundle.module.url(
+            forResource: "test",
+            withExtension: "cl",
+            subdirectory: "Resources"
+        )
+    )
     
-    let chars = Array(string)
-    
-    var lexer = CoolLexer()
+    var lexer = CoolLexer(try String(contentsOf: url))
     var tokens = [Token]()
     
-    for i in 0..<chars.count {
-        let char = chars[i]
-        let result = lexer.lexing(
-            char,
-            at: SourceLocation(line: 1, column: i + 1, file: "")
-        )
-        
-        switch result {
-            case .continue, .failed:
-                continue
-            case .found(let token):
-                tokens.append(token)
+    while !lexer.reachedEnd {
+        guard let token = try? lexer.next() else { continue }
+        if case TokenKind.unknown = token.kind {
+            continue
         }
+        tokens.append(token)
     }
     
-    #expect(
-        tokens == [
-            Token(
-                kind: .integerLiteral("8328239823992"),
-                location: SourceLocation(line: 1, column: 1, file: "")
-            ),
-            Token(
-                kind: .stringLiteral("\"heriuwhehriuwhwiorw\""),
-                location: SourceLocation(line: 1, column: 15, file: "")
-            )
-        ]
-    )
+    let expected = [
+        Token(kind: .stringLiteral("123 456")),
+        Token(kind: .stringLiteral("123456")),
+        Token(kind: .stringLiteral("123 456")),
+        Token(kind: .stringLiteral("123\\n456")),
+    ]
+    
+    #expect(tokens == expected)
 }

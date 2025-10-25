@@ -32,6 +32,7 @@ public enum TokenKind: Hashable, Equatable {
     case star                         // *  (multiply)
     case stringLiteral(String)        // String constants (without quotes)
     case tilde                        // ~  (integer complement)
+    case unknown(String)
 }
 
 
@@ -62,6 +63,7 @@ extension TokenKind {
             case .slash: return "/"
             case .star: return "*"
             case .tilde: return "~"
+            case .unknown(let text): return text
         }
     }
 }

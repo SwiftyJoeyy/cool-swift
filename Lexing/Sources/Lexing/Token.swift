@@ -9,7 +9,12 @@ import Foundation
 
 public struct Token: Equatable, Hashable {
     public let kind: TokenKind
-    public let location: SourceLocation
+    public let location: SourceLocation?
+    
+    init(kind: TokenKind, location: SourceLocation? = nil) {
+        self.kind = kind
+        self.location = location
+    }
 }
 
 public struct SourceLocation: Equatable, Hashable {

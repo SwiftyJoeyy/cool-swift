@@ -7,43 +7,66 @@
 
 import Foundation
 
-internal struct StringLiteralLexer {
-    private static let doubleQuote: Character = "\""
-    
-    private let location: SourceLocation
-    private var length = 0
-    private var literal = ""
-    
-    internal init(location: SourceLocation, literal: String) {
-        self.location = location
-        self.literal = literal
+internal struct StringLiteralLexer: TokenLexer {
+    internal static func matches(_ char: UInt8) -> Bool {
+        return char == ASCII.quote
     }
-}
-
-extension StringLiteralLexer: TokenLexer {
-    internal mutating func lexing(
-        _ char: Char,
-        at location: SourceLocation
-    ) -> LexingResult {
-        literal.append(String(char))
-        length += 1
+    
+    internal static func lex(for cursor: inout Cursor) throws -> Token {
+        var literal = ""
+        var length = 0
         
-        if char == Self.doubleQuote {
-            return .found(
-                Token(
-                    kind: .stringLiteral(literal),
-                    location: self.location
-                )
-            )
+        func append(_ char: UInt8) {
+            literal += String(UnicodeScalar(char))
+            length += 1
         }
-        return .continue
-    }
-    
-    internal static func matches(_ char: Char) -> Bool {
-        return char == Self.doubleQuote
-    }
-    
-    internal static func new(for char: Char, at location: SourceLocation) -> Self {
-        return StringLiteralLexer(location: location, literal: String(char))
+        
+        func advanceToQuote() {
+            while !cursor.reachedEnd {
+                if let char = cursor.next(), char == ASCII.quote {
+                    return
+                }
+            }
+        }
+        
+        cursor.advance()
+        
+        while !cursor.reachedEnd {
+            guard let char = cursor.next() else {
+                advanceToQuote()
+                throw LexerError.testing // TODO: - Add diagnostic
+            }
+            
+            switch char {
+                case ASCII.quote:
+                    return Token(kind: .stringLiteral(literal)) // TODO: - Handle location
+                    
+                case ASCII.newline:
+                    advanceToQuote()
+                    throw LexerError.testing // TODO: - Add diagnostic
+                    
+                case ASCII.backslash:
+                    guard let next = cursor.next() else {
+                        advanceToQuote()
+                        throw LexerError.testing // TODO: - Add diagnostic
+                    }
+                    
+                    if next == ASCII.newline {
+                        continue
+                    }
+                    append(char)
+                    append(next)
+                    
+                default:
+                    append(char)
+            }
+            
+            if length == 1025 {
+                break
+            }
+        }
+        
+        advanceToQuote()
+        throw LexerError.testing // TODO: - Add diagnostic
     }
 }
