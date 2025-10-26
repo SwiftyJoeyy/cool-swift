@@ -37,15 +37,13 @@ internal struct StringLiteralLexer: TokenLexer {
                 throw Diagnostic(.unescapedNewline)
             }
             
-            if length > 1024 {
+            if length >= 1024 {
                 cursor.advance(until: {$0 == .quote})
                 throw Diagnostic(.stringTooLong)
             }
             
             if char == .backslash {
-                guard let next = cursor.next() else {
-                    throw Diagnostic(.missingEndQuote)
-                }
+                guard let next = cursor.next() else { break }
                 switch next {
                     case .newline: break
                     case "n": append(.newline)
