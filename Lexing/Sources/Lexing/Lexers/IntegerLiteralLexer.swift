@@ -1,51 +1,45 @@
-////
-////  IntegerLiteralLexer.swift
-////  Lexing
-////
-////  Created by Joe Maghzal on 25/10/2025.
-////
 //
-//import Foundation
+//  IntegerLiteralLexer.swift
+//  Lexing
 //
-//internal struct IntegerLiteralLexer {
-//    private let location: SourceLocation
-//    private var length = 0
-//    private var literal = ""
-//    
-//    internal init(location: SourceLocation, literal: String) {
-//        self.location = location
-//        self.literal = literal
-//    }
-//}
+//  Created by Joe Maghzal on 25/10/2025.
 //
-//extension IntegerLiteralLexer: TokenLexer {
-//    internal mutating func lexing(
-////        _ char: Char,
-//        at location: SourceLocation
-//    ) -> LexingResult {
-//        if char == " " { #warning("This is just for testing, fix it!")
-//            return .found(
-//                Token(
-//                    kind: .integerLiteral(literal),
-//                    location: self.location
-//                )
-//            )
-//        }
-//        literal.append(String(char))
-//        length += 1
-//        return .continue
-//    }
-//    
-//    internal static func matches(_ char: Char) -> Bool {
-//        switch char {
-//            case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9":
-//                return true
-//            default:
-//                return false
-//        }
-//    }
-//    
-//    internal static func new(for char: Char, at location: SourceLocation) -> Self {
-//        return IntegerLiteralLexer(location: location, literal: String(char))
-//    }
-//}
+
+import Foundation
+import Diagnostics
+
+internal struct IntegerLiteralLexer: TokenLexer {
+    internal static func matches(_ char: UInt8) -> Bool {
+        return isNumber(char)
+    }
+    
+    static func lex(for cursor: inout Cursor) throws(Diagnostic) -> Token {
+        let start = cursor.location
+        var literal = cursor.peek()?.unicode ?? ""
+        while let char = cursor.peek(aheadBy: 1) {
+            guard isNumber(char) else {
+                if endOfInt(char) {
+                    break
+                }
+                cursor.advance(until: endOfInt)
+                throw Diagnostic(.invalidInteger)
+            }
+            literal.append(char.unicode)
+            cursor.advance()
+        }
+        
+        return Token(
+            kind: .integerLiteral(literal),
+            location: start
+        )
+    }
+    
+    private static func endOfInt(_ char: UInt8) -> Bool {
+        #warning("Check for other valid chars like operators")
+        return char == .newline || char == .space
+    }
+    
+    private static func isNumber(_ char: UInt8) -> Bool {
+        return char >= UInt8(ascii: "0") && char <= UInt8(ascii: "9")
+    }
+}

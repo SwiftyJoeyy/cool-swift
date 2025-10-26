@@ -16,6 +16,7 @@ internal enum LexerError {
     
     case unterminatedComment
     case reachedEndOfFile
+    case invalidInteger
 }
 
 extension LexerError: DiagnosticConvertible {

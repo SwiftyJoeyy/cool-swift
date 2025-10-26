@@ -17,7 +17,7 @@ internal protocol TokenLexer {
 public struct CoolLexer {
     private let chain = Chain(
         StringLiteralLexer.self,
-//        IntegerLiteralLexer.self
+        IntegerLiteralLexer.self
     )
     private var cursor: Cursor
     

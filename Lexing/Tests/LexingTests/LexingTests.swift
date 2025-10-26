@@ -25,14 +25,21 @@ import Diagnostics
         }
     }
     
-    let expected = [
+    let expectedTokens = [
         Token(kind: .stringLiteral("123 456"), location: SourceLocation(line: 12, column: 1, file: "")),
         Token(kind: .stringLiteral("123456"), location: SourceLocation(line: 15, column: 1, file: "")),
-        Token(kind: .stringLiteral("123 456"), location: SourceLocation(line: 18, column: 1, file: "")),
-        Token(kind: .stringLiteral("123\n456"), location: SourceLocation(line: 23, column: 1, file: "")),
-        Token(kind: .endOfFile, location: SourceLocation(line: 24, column: 0, file: ""))
+        Token(kind: .integerLiteral("123"), location: SourceLocation(line: 18, column: 1, file: "")),
+        Token(kind: .stringLiteral("123 456"), location: SourceLocation(line: 20, column: 1, file: "")),
+        Token(kind: .stringLiteral("123\n456"), location: SourceLocation(line: 27, column: 1, file: "")),
+        Token(kind: .integerLiteral("123456"), location: SourceLocation(line: 29, column: 1, file: "")),
+        Token(kind: .endOfFile, location: SourceLocation(line: 30, column: 0, file: ""))
     ]
     
-    #expect(tokens == expected)
-    #expect(diagnostics.map(\.id) == [Diagnostic(.unescapedNewline)].map(\.id))
+    let expectedDiags = [
+        Diagnostic(.unescapedNewline),
+        Diagnostic(.invalidInteger),
+    ]
+    
+    #expect(tokens == expectedTokens)
+    #expect(diagnostics.map(\.id) == expectedDiags.map(\.id))
 }
