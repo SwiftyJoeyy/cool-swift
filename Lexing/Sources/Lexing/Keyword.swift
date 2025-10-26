@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum Keyword: UInt8, Hashable, Equatable {
+public enum Keyword: UInt8, Hashable, Equatable, Sendable {
     case `case`
     case `class`
     case `else`

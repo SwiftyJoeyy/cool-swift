@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum TokenKind: Hashable, Equatable {
+public enum TokenKind: Hashable, Equatable, Sendable {
     case arrow                        // => (used in case branches)
     case assign                       // <- (assignment)
     case at                           // @  (static dispatch)
