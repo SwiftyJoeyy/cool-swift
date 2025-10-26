@@ -6,13 +6,19 @@
 //
 
 import Foundation
+import Diagnostics
+
+internal protocol TokenLexer {
+    static func matches(_ char: UInt8) -> Bool
+    
+    static func lex(for cursor: inout Cursor) throws(Diagnostic) -> Token
+}
 
 public struct CoolLexer {
     private let chain = Chain(
         StringLiteralLexer.self,
 //        IntegerLiteralLexer.self
     )
-    
     private var cursor: Cursor
     
     public var reachedEnd: Bool {
@@ -23,21 +29,70 @@ public struct CoolLexer {
         self.cursor = Cursor(string)
     }
     
-    public mutating func next() throws -> Token {
-        guard let char = cursor.peek(aheadBy: 1) else {
-            throw LexerError.testing // TODO: - Add diagnostic
+    public mutating func next() throws(Diagnostic) -> Token {
+        if cursor.reachedEnd {
+            throw Diagnostic(.reachedEndOfFile)
+        }
+        try skipWhitespaceAndComments()
+        
+        guard let char = cursor.peek() else {
+            return Token(kind: .endOfFile, location: cursor.location)
+        }
+        
+        defer {
+            cursor.advance()
         }
         
         if let lexer = chain.lexer(char) {
             return try lexer.lex(for: &cursor)
         }
-        cursor.advance()
-        return Token(kind: .unknown(String(UnicodeScalar(char))))
+        return Token(kind: .unknown(char.unicode), location: cursor.location)
+    }
+    
+    private mutating func skipWhitespaceAndComments() throws(Diagnostic) {
+        while let char = cursor.peek() {
+            if char == .space || char == .newline ||
+                char == UInt8(ascii: "\t") || char == UInt8(ascii: "\r") {
+                cursor.advance()
+                continue
+            }
+            
+            if char == "-" && cursor.peek(aheadBy: 1) == "-" {
+                cursor.advance(by: 2)
+                while let char = cursor.peek(), char != .newline {
+                    cursor.advance()
+                }
+                continue
+            }
+            
+            if char == "(" && cursor.peek(aheadBy: 1) == "*" {
+                cursor.advance(by: 2)
+                var depth = 1
+                
+                while depth > 0, let char = cursor.peek() {
+                    cursor.advance()
+                    if char == "(" && cursor.peek() == "*" {
+                        cursor.advance()
+                        depth += 1
+                    } else if char == "*" && cursor.peek() == ")" {
+                        cursor.advance()
+                        depth -= 1
+                    }
+                }
+                
+                if depth > 0 {
+                    throw Diagnostic(.unterminatedComment)
+                }
+                continue
+            }
+            
+            break
+        }
     }
 }
 
 extension CoolLexer {
-    internal struct Chain<each L: TokenLexer> {
+    private struct Chain<each L: TokenLexer> {
         private let lexer: (repeat (each L).Type)
         
         internal init(_ lexer: repeat (each L).Type) {
@@ -53,44 +108,4 @@ extension CoolLexer {
             return nil
         }
     }
-}
-
-internal struct Cursor {
-    private let input: [UInt8]
-    private let length: Int
-    private var position = -1
-    
-    internal var reachedEnd: Bool {
-        return position == length - 1
-    }
-    
-    internal init(_ string: String) {
-        self.input = Array(string.utf8)
-        self.length = input.count
-    }
-    
-    internal func peek(aheadBy offset: Int = 0) -> UInt8? {
-        let nexPos = position + offset
-        guard nexPos < length, nexPos >= 0 else {
-            return nil
-        }
-        return input[nexPos]
-    }
-    
-    internal mutating func advance(by offset: Int = 1) {
-        let nexPos = position + offset
-        guard nexPos < length, nexPos >= 0 else {
-            return
-        }
-        position = nexPos
-    }
-    
-    internal mutating func next() -> UInt8? {
-        advance()
-        return input[position]
-    }
-}
-
-internal enum LexerError: Error { #warning("This is for testing only, we need a proper diagnostic system")
-    case testing
 }

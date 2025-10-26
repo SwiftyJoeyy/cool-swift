@@ -6,67 +6,60 @@
 //
 
 import Foundation
+import Diagnostics
 
 internal struct StringLiteralLexer: TokenLexer {
     internal static func matches(_ char: UInt8) -> Bool {
-        return char == ASCII.quote
+        return char == .quote
     }
     
-    internal static func lex(for cursor: inout Cursor) throws -> Token {
+    internal static func lex(for cursor: inout Cursor) throws(Diagnostic) -> Token {
+        let start = cursor.location
         var literal = ""
         var length = 0
         
-        func append(_ char: UInt8) {
-            literal += String(UnicodeScalar(char))
+        @inline(__always) func append(_ char: UInt8) {
+            literal += char.unicode
             length += 1
         }
         
-        func advanceToQuote() {
-            while !cursor.reachedEnd {
-                if let char = cursor.next(), char == ASCII.quote {
-                    return
+        while let char = cursor.next() {
+            if char == 0 {
+                throw Diagnostic(.stringContainsNull)
+            }
+            
+            if char == .quote {
+                return Token(kind: .stringLiteral(literal), location: start)
+            }
+            
+            if char == .newline {
+                cursor.advance(until: {$0 == .quote})
+                throw Diagnostic(.unescapedNewline)
+            }
+            
+            if length > 1024 {
+                cursor.advance(until: {$0 == .quote})
+                throw Diagnostic(.stringTooLong)
+            }
+            
+            if char == .backslash {
+                guard let next = cursor.next() else {
+                    throw Diagnostic(.missingEndQuote)
                 }
-            }
-        }
-        
-        cursor.advance()
-        
-        while !cursor.reachedEnd {
-            guard let char = cursor.next() else {
-                advanceToQuote()
-                throw LexerError.testing // TODO: - Add diagnostic
-            }
-            
-            switch char {
-                case ASCII.quote:
-                    return Token(kind: .stringLiteral(literal)) // TODO: - Handle location
-                    
-                case ASCII.newline:
-                    advanceToQuote()
-                    throw LexerError.testing // TODO: - Add diagnostic
-                    
-                case ASCII.backslash:
-                    guard let next = cursor.next() else {
-                        advanceToQuote()
-                        throw LexerError.testing // TODO: - Add diagnostic
-                    }
-                    
-                    if next == ASCII.newline {
-                        continue
-                    }
-                    append(char)
-                    append(next)
-                    
-                default:
-                    append(char)
+                switch next {
+                    case .newline: break
+                    case "n": append(.newline)
+                    case "t": append(.tab)
+                    case "b": append(.backspace)
+                    case "f": append(.formfeed)
+                    default: append(next)
+                }
+                continue
             }
             
-            if length == 1025 {
-                break
-            }
+            append(char)
         }
         
-        advanceToQuote()
-        throw LexerError.testing // TODO: - Add diagnostic
+        throw Diagnostic(.missingEndQuote)
     }
 }
