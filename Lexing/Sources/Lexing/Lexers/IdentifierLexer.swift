@@ -1,19 +1,19 @@
 //
-//  IntegerLiteralLexer.swift
+//  IdentifierLexer.swift
 //  Lexing
 //
-//  Created by Joe Maghzal on 25/10/2025.
+//  Created by Joe Maghzal on 08/11/2025.
 //
 
 import Foundation
 import Diagnostics
 
-internal struct IntegerLiteralLexer: TokenLexer {
+internal struct IdentifierLexer: TokenLexer {
     internal static func matches(_ char: UInt8) -> Bool {
-        return valid(char)
+        return (char >= "a" && char <= "z") || (char >= "A" && char <= "Z")
     }
     
-    static func lex(for cursor: inout Cursor) throws(Diagnostic) -> Token {
+    internal static func lex(for cursor: inout Cursor) throws(Diagnostic) -> Token {
         let start = cursor.location
         assert(cursor.peek() != nil)
         var literal = cursor.peek()!.unicode
@@ -24,14 +24,21 @@ internal struct IntegerLiteralLexer: TokenLexer {
                     break
                 }
                 cursor.advance(until: validSeparator)
-                throw Diagnostic(.invalidInteger)
+                throw Diagnostic(.invalidIdentifier)
             }
             literal.append(char.unicode)
             cursor.advance()
         }
         
+        if let keyword = Keyword(literal) {
+            return Token(
+                kind: .keyword(keyword),
+                location: start
+            )
+        }
+        
         return Token(
-            kind: .integerLiteral(literal),
+            kind: .identifier(literal),
             location: start
         )
     }
@@ -50,6 +57,8 @@ internal struct IntegerLiteralLexer: TokenLexer {
     }
     
     private static func valid(_ char: UInt8) -> Bool {
-        return char >= "0" && char <= "9"
+        let isLetter = (char >= "a" && char <= "z") || (char >= "A" && char <= "Z")
+        let isNumber = char >= "0" && char <= "9"
+        return isLetter || isNumber || char == "_"
     }
 }

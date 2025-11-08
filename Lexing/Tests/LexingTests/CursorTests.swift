@@ -1,3 +1,10 @@
+//
+//  CursorTests.swift
+//  Lexing
+//
+//  Created by Joe Maghzal on 08/11/2025.
+//
+
 import Testing
 @testable import Lexing
 

@@ -8,7 +8,7 @@
 import Foundation
 import Diagnostics
 
-internal enum LexerError {
+public enum LexerError {
     case unescapedNewline
     case stringTooLong
     case missingEndQuote
@@ -16,19 +16,23 @@ internal enum LexerError {
     
     case unterminatedComment
     case reachedEndOfFile
+    
+    case unexpectedCharacter
+    
     case invalidInteger
+    case invalidIdentifier
 }
 
 extension LexerError: DiagnosticConvertible {
-    var id: String {
+    public var id: String {
         return "LexerError-\(self)"
     }
     
-    var severity: Diagnostics.DiagnosticSeverity {
+    public var severity: Diagnostics.DiagnosticSeverity {
         return .error
     }
     
-    var message: String {
+    public var message: String {
         return "\(self)"
     }
 }

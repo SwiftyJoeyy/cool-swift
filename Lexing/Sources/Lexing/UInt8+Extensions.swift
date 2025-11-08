@@ -42,7 +42,26 @@ extension UInt8? {
     internal static func != (i: Self, s: Unicode.Scalar) -> Bool {
         return i != UInt8(ascii: s)
     }
+    
     internal static func ~= (s: Unicode.Scalar, i: Self) -> Bool {
         return i == UInt8(ascii: s)
+    }
+}
+    
+extension UInt8 {
+    internal static func > (i: Self, s: Unicode.Scalar) -> Bool {
+        return i > UInt8(ascii: s)
+    }
+    
+    internal static func >= (i: Self, s: Unicode.Scalar) -> Bool {
+        return i >= UInt8(ascii: s)
+    }
+    
+    internal static func < (i: Self, s: Unicode.Scalar) -> Bool {
+        return i > UInt8(ascii: s)
+    }
+    
+    internal static func <= (i: Self, s: Unicode.Scalar) -> Bool {
+        return i <= UInt8(ascii: s)
     }
 }

@@ -1,3 +1,10 @@
+//
+//  StringLiteralLexerTests.swift
+//  Lexing
+//
+//  Created by Joe Maghzal on 08/11/2025.
+//
+
 import Testing
 import Diagnostics
 @testable import Lexing

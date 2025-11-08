@@ -33,12 +33,12 @@ internal struct StringLiteralLexer: TokenLexer {
             }
             
             if char == .newline {
-                cursor.advance(until: {$0 == .quote})
+                cursor.advance(until: validSeparator)
                 throw Diagnostic(.unescapedNewline)
             }
             
             if length >= 1024 {
-                cursor.advance(until: {$0 == .quote})
+                cursor.advance(until: validSeparator)
                 throw Diagnostic(.stringTooLong)
             }
             
@@ -59,5 +59,9 @@ internal struct StringLiteralLexer: TokenLexer {
         }
         
         throw Diagnostic(.missingEndQuote)
+    }
+    
+    private static func validSeparator(_ char: UInt8) -> Bool {
+        return char == .quote
     }
 }
