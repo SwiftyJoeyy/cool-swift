@@ -38,7 +38,7 @@ internal struct PunctuationLexer: TokenLexer {
             case ";":
                 return Token(kind: .semicolon, location: start)
             default:
-                throw Diagnostic(.unexpectedCharacter)
+                throw Diagnostic(LexerError.unexpectedCharacter, location: start)
         }
     }
 }

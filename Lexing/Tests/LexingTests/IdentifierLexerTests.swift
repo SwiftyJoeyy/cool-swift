@@ -244,7 +244,7 @@ import Diagnostics
         let diag = try #require(throws: Diagnostic.self) {
             _ = try IdentifierLexer.lex(for: &cursor)
         }
-        #expect(diag.id == Diagnostic(.invalidIdentifier).id)
+        #expect(diag.id == Diagnostic(LexerError.invalidIdentifier).id)
     }
     
     @Test func `lex throws on identifier with hash`() throws {
@@ -252,6 +252,6 @@ import Diagnostics
         let diag = try #require(throws: Diagnostic.self) {
             _ = try IdentifierLexer.lex(for: &cursor)
         }
-        #expect(diag.id == Diagnostic(.invalidIdentifier).id)
+        #expect(diag.id == Diagnostic(LexerError.invalidIdentifier).id)
     }
 }

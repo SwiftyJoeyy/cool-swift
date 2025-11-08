@@ -80,7 +80,7 @@ import Diagnostics
         let diag = try #require(throws: Diagnostic.self) {
             _ = try StringLiteralLexer.lex(for: &cursor)
         }
-        #expect(diag.id == Diagnostic(.unescapedNewline).id)
+        #expect(diag.id == Diagnostic(LexerError.unescapedNewline).id)
     }
     
     @Test func `lex throws on missing end quote`() throws {
@@ -88,7 +88,7 @@ import Diagnostics
         let diag = try #require(throws: Diagnostic.self) {
             _ = try StringLiteralLexer.lex(for: &cursor)
         }
-        #expect(diag.id == Diagnostic(.missingEndQuote).id)
+        #expect(diag.id == Diagnostic(LexerError.missingEndQuote).id)
     }
     
     @Test func `lex throws on missing end quote after backslash`() throws {
@@ -96,7 +96,7 @@ import Diagnostics
         let diag = try #require(throws: Diagnostic.self) {
             _ = try StringLiteralLexer.lex(for: &cursor)
         }
-        #expect(diag.id == Diagnostic(.missingEndQuote).id)
+        #expect(diag.id == Diagnostic(LexerError.missingEndQuote).id)
     }
     
     @Test func `lex throws on null character in string`() throws {
@@ -104,7 +104,7 @@ import Diagnostics
         let diag = try #require(throws: Diagnostic.self) {
             _ = try StringLiteralLexer.lex(for: &cursor)
         }
-        #expect(diag.id == Diagnostic(.stringContainsNull).id)
+        #expect(diag.id == Diagnostic(LexerError.stringContainsNull).id)
     }
     
     @Test func `lex throws on string exceeding 1024 characters`() throws {
@@ -113,6 +113,6 @@ import Diagnostics
         let diag = try #require(throws: Diagnostic.self) {
             _ = try StringLiteralLexer.lex(for: &cursor)
         }
-        #expect(diag.id == Diagnostic(.stringTooLong).id)
+        #expect(diag.id == Diagnostic(LexerError.stringTooLong).id)
     }
 }

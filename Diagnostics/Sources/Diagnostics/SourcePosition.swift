@@ -7,14 +7,14 @@
 
 import Foundation
 
-public protocol SourcePositionRepresentible {
-    var position: SourcePosition { get }
-}
-
-public struct SourcePosition: Equatable, Hashable, Sendable {
-    public let offset: Int
+public struct SourceLocation: Equatable, Hashable, Sendable {
+    public let line: Int
+    public let column: Int
+    public let file: String
     
-    public init(offset: Int) {
-        self.offset = offset
+    public init(line: Int, column: Int, file: String) {
+        self.line = line
+        self.column = column
+        self.file = file
     }
 }

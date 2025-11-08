@@ -25,7 +25,7 @@ internal struct StringLiteralLexer: TokenLexer {
         
         while let char = cursor.next() {
             if char == 0 {
-                throw Diagnostic(.stringContainsNull)
+                throw Diagnostic(LexerError.stringContainsNull, location: start)
             }
             
             if char == .quote {
@@ -34,12 +34,12 @@ internal struct StringLiteralLexer: TokenLexer {
             
             if char == .newline {
                 cursor.advance(until: validSeparator)
-                throw Diagnostic(.unescapedNewline)
+                throw Diagnostic(LexerError.unescapedNewline, location: start)
             }
             
             if length >= 1024 {
                 cursor.advance(until: validSeparator)
-                throw Diagnostic(.stringTooLong)
+                throw Diagnostic(LexerError.stringTooLong, location: start)
             }
             
             if char == .backslash {
@@ -58,7 +58,7 @@ internal struct StringLiteralLexer: TokenLexer {
             append(char)
         }
         
-        throw Diagnostic(.missingEndQuote)
+        throw Diagnostic(LexerError.missingEndQuote, location: start)
     }
     
     private static func validSeparator(_ char: UInt8) -> Bool {

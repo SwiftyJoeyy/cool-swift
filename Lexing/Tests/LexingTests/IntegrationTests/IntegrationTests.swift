@@ -47,7 +47,7 @@ protocol TestFile {
         let (tokens, diagnostics) = try lexFile(testFile.name)
 
         #expect(tokens == testFile.tokens)
-        #expect(diagnostics.map(\.id) == testFile.diagnostics.map(\.id))
+        #expect(diagnostics == testFile.diagnostics)
     }
     
 // MARK: - Test Methods

@@ -24,7 +24,7 @@ internal struct IntegerLiteralLexer: TokenLexer {
                     break
                 }
                 cursor.advance(until: validSeparator)
-                throw Diagnostic(.invalidInteger)
+                throw Diagnostic(LexerError.invalidInteger, location: start)
             }
             literal.append(char.unicode)
             cursor.advance()

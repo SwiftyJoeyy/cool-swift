@@ -64,7 +64,7 @@ import Diagnostics
         let diag = try #require(throws: Diagnostic.self) {
             _ = try lexer.next()
         }
-        #expect(diag.id == Diagnostic(.unterminatedComment).id)
+        #expect(diag.id == Diagnostic(LexerError.unterminatedComment).id)
     }
     
 // MARK: - End of file tests
@@ -72,16 +72,6 @@ import Diagnostics
         var lexer = CoolLexer("   ")
         let token = try lexer.next()
         #expect(token.kind == .endOfFile)
-    }
-    
-    @Test func `lexer throws when calling next after end`() {
-        var lexer = CoolLexer("")
-        do {
-            _ = try lexer.next()
-            Issue.record("Expected error to be thrown")
-        } catch {
-            #expect(error.id == Diagnostic(.reachedEndOfFile).id)
-        }
     }
     
 // MARK: - Lexing tests

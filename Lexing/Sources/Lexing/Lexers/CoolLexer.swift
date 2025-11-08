@@ -34,7 +34,7 @@ public struct CoolLexer {
     
     public mutating func next() throws(Diagnostic) -> Token {
         if cursor.reachedEnd {
-            throw Diagnostic(.reachedEndOfFile)
+            return Token(kind: .endOfFile, location: cursor.location)
         }
         try skipWhitespaceAndComments()
         
@@ -69,6 +69,7 @@ public struct CoolLexer {
             }
             
             if char == "(" && cursor.peek(aheadBy: 1) == "*" {
+                let start = cursor.location
                 cursor.advance(by: 2)
                 var depth = 1
                 
@@ -84,7 +85,7 @@ public struct CoolLexer {
                 }
                 
                 if depth > 0 {
-                    throw Diagnostic(.unterminatedComment)
+                    throw Diagnostic(LexerError.unterminatedComment, location: start)
                 }
                 continue
             }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Diagnostics
 
 internal struct Cursor {
     private let input: [UInt8]

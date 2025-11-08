@@ -7,50 +7,40 @@
 
 import Foundation
 
-public struct Diagnostic: Error {
+public struct Diagnostic: Error, Equatable, Hashable, Sendable {
     public let id: String
     public let severity: DiagnosticSeverity
     public let message: String
-    public var startPosition: SourcePosition?
-    public var highlights: [any HighlightableToken]
+    public var location: SourceLocation?
     
     public init(
         id: String,
         severity: DiagnosticSeverity,
         message: String,
-        startPosition: SourcePosition? = nil,
-        highlights: [any HighlightableToken] = []
+        location: SourceLocation? = nil
     ) {
         self.id = id
         self.severity = severity
         self.message = message
-        self.startPosition = startPosition
-        self.highlights = highlights
+        self.location = location
     }
     
     public init(
         _ diagnostic: some DiagnosticConvertible,
-        startPosition: SourcePosition? = nil,
-        highlights: [any HighlightableToken] = []
+        location: SourceLocation? = nil
     ) {
         self.init(
             id: diagnostic.id,
             severity: diagnostic.severity,
             message: diagnostic.message,
-            startPosition: startPosition,
-            highlights: highlights
+            location: location
         )
     }
 }
 
 extension Diagnostic {
-    public consuming func starts(at position: SourcePosition) -> Self {
-        startPosition = position
-        return self
-    }
-    
-    public consuming func highlights(at token: any HighlightableToken) -> Self {
-        highlights.append(token)
+    public consuming func starts(at location: SourceLocation) -> Self {
+        self.location = location
         return self
     }
 }

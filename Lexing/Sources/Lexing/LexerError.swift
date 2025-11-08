@@ -15,7 +15,6 @@ public enum LexerError {
     case stringContainsNull
     
     case unterminatedComment
-    case reachedEndOfFile
     
     case unexpectedCharacter
     
@@ -34,15 +33,5 @@ extension LexerError: DiagnosticConvertible {
     
     public var message: String {
         return "\(self)"
-    }
-}
-
-extension Diagnostic {
-    @_disfavoredOverload internal init(
-        _ error: LexerError,
-        startPosition: SourcePosition? = nil,
-        highlights: [any HighlightableToken] = []
-    ) {
-        self.init(error, startPosition: startPosition, highlights: highlights)
     }
 }

@@ -37,9 +37,9 @@ enum DiagnosticsTestFile: TestFile {
     ]
     
     static let diagnostics: [Diagnostic] = [
-        Diagnostic(.invalidInteger),
-        Diagnostic(.unescapedNewline),
-        Diagnostic(.invalidInteger),
-        Diagnostic(.unescapedNewline)
+        Diagnostic(LexerError.invalidInteger, location: SourceLocation(line: 3, column: 16, file: "")),
+        Diagnostic(LexerError.unescapedNewline, location: SourceLocation(line: 4, column: 19, file: "")),
+        Diagnostic(LexerError.invalidInteger, location: SourceLocation(line: 6, column: 16, file: "")),
+        Diagnostic(LexerError.unescapedNewline, location: SourceLocation(line: 7, column: 19, file: ""))
     ]
 }

@@ -45,7 +45,7 @@ internal struct OperatorLexer: TokenLexer {
             case "~":
                 return Token(kind: .tilde, location: start)
             default:
-                throw Diagnostic(.unexpectedCharacter)
+                throw Diagnostic(LexerError.unexpectedCharacter, location: start)
         }
     }
 }

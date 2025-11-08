@@ -133,7 +133,7 @@ import Diagnostics
         let diag = try #require(throws: Diagnostic.self) {
             _ = try IntegerLiteralLexer.lex(for: &cursor)
         }
-        #expect(diag.id == Diagnostic(.invalidInteger).id)
+        #expect(diag.id == Diagnostic(LexerError.invalidInteger).id)
     }
     
     @Test func `lex throws on integer followed by underscore`() throws {
@@ -141,7 +141,7 @@ import Diagnostics
         let diag = try #require(throws: Diagnostic.self) {
             _ = try IntegerLiteralLexer.lex(for: &cursor)
         }
-        #expect(diag.id == Diagnostic(.invalidInteger).id)
+        #expect(diag.id == Diagnostic(LexerError.invalidInteger).id)
     }
     
     @Test func `lex throws on integer followed by letter`() throws {
@@ -149,6 +149,6 @@ import Diagnostics
         let diag = try #require(throws: Diagnostic.self) {
             _ = try IntegerLiteralLexer.lex(for: &cursor)
         }
-        #expect(diag.id == Diagnostic(.invalidInteger).id)
+        #expect(diag.id == Diagnostic(LexerError.invalidInteger).id)
     }
 }
