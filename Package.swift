@@ -8,19 +8,34 @@ let package = Package(
         .macOS(.v14)
     ],
     dependencies: [
+        Basic.package,
         ArgumentParser.package,
-        Lexing.package
+        Lexing.package,
+        Parsing.package
     ],
     targets: [
         .executableTarget(
             name: "CoolSwift",
             dependencies: [
+                Basic.target,
                 ArgumentParser.target,
-                Lexing.target
+                Lexing.target,
+                Parsing.target
             ]
         ),
     ]
 )
+
+enum Basic {
+    static let target = Target.Dependency.product(
+        name: "Basic",
+        package: "Basic"
+    )
+    
+    static var package: Package.Dependency {
+        return Package.Dependency.package(path: "Basic")
+    }
+}
 
 enum ArgumentParser {
     static let target = Target.Dependency.product(
@@ -44,5 +59,16 @@ enum Lexing {
     
     static var package: Package.Dependency {
         return Package.Dependency.package(path: "Lexing")
+    }
+}
+
+enum Parsing {
+    static let target = Target.Dependency.product(
+        name: "Parsing",
+        package: "Parsing"
+    )
+    
+    static var package: Package.Dependency {
+        return Package.Dependency.package(path: "Parsing")
     }
 }

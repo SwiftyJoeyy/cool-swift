@@ -14,12 +14,14 @@ let package = Package(
         ),
     ],
     dependencies: [
+        Basic.package,
         Diagnostics.package
     ],
     targets: [
         .target(
             name: "Lexing",
             dependencies: [
+                Basic.target,
                 Diagnostics.target
             ]
         ),
@@ -39,5 +41,16 @@ enum Diagnostics {
     
     static var package: Package.Dependency {
         return Package.Dependency.package(path: "../Diagnostics")
+    }
+}
+
+enum Basic {
+    static let target = Target.Dependency.product(
+        name: "Basic",
+        package: "Basic"
+    )
+    
+    static var package: Package.Dependency {
+        return Package.Dependency.package(path: "../Basic")
     }
 }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Basic
 import Diagnostics
 
 public struct Token: Equatable, Hashable, Sendable {

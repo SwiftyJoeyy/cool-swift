@@ -10,9 +10,13 @@ let package = Package(
             targets: ["Diagnostics"]
         ),
     ],
+    dependencies: [
+        Basic.package
+    ],
     targets: [
         .target(
-            name: "Diagnostics"
+            name: "Diagnostics",
+            dependencies: [Basic.target]
         ),
         .testTarget(
             name: "DiagnosticsTests",
@@ -20,3 +24,14 @@ let package = Package(
         ),
     ]
 )
+
+enum Basic {
+    static let target = Target.Dependency.product(
+        name: "Basic",
+        package: "Basic"
+    )
+    
+    static var package: Package.Dependency {
+        return Package.Dependency.package(path: "../Basic")
+    }
+}

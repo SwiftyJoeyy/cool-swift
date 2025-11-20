@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Basic
 import Diagnostics
 
 internal struct Cursor {

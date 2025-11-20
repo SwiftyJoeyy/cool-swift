@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Basic
 
 public struct Diagnostic: Error, Equatable, Hashable, Sendable {
     public let id: String
