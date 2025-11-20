@@ -7,7 +7,7 @@
 
 import Testing
 import Diagnostics
-@testable import Lexing
+@testable import Lexer
 
 @Suite struct StringLiteralLexerTests {
 // MARK: - Matching tests

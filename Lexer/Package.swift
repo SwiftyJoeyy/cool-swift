@@ -3,34 +3,46 @@
 import PackageDescription
 
 let package = Package(
-    name: "Parsing",
+    name: "Lexer",
     platforms: [
         .macOS(.v14)
     ],
     products: [
         .library(
-            name: "Parsing",
-            targets: ["Parsing"]
+            name: "Lexer",
+            targets: ["Lexer"]
         ),
     ],
     dependencies: [
         Basic.package,
-        Lexing.package,
+        Diagnostics.package
     ],
     targets: [
         .target(
-            name: "Parsing",
+            name: "Lexer",
             dependencies: [
                 Basic.target,
-                Lexing.target
+                Diagnostics.target
             ]
         ),
         .testTarget(
-            name: "ParsingTests",
-            dependencies: ["Parsing"]
+            name: "LexerTests",
+            dependencies: ["Lexer"],
+            resources: [.copy("IntegrationTests/Resources")]
         ),
     ]
 )
+
+enum Diagnostics {
+    static let target = Target.Dependency.product(
+        name: "Diagnostics",
+        package: "Diagnostics"
+    )
+    
+    static var package: Package.Dependency {
+        return Package.Dependency.package(path: "../Diagnostics")
+    }
+}
 
 enum Basic {
     static let target = Target.Dependency.product(
@@ -40,16 +52,5 @@ enum Basic {
     
     static var package: Package.Dependency {
         return Package.Dependency.package(path: "../Basic")
-    }
-}
-
-enum Lexing {
-    static let target = Target.Dependency.product(
-        name: "Lexing",
-        package: "Lexing"
-    )
-    
-    static var package: Package.Dependency {
-        return Package.Dependency.package(path: "../Lexing")
     }
 }

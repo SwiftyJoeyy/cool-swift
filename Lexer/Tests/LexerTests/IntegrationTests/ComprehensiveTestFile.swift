@@ -8,7 +8,7 @@
 import Testing
 import Foundation
 import Diagnostics
-@testable import Lexing
+@testable import Lexer
 
 enum ComprehensiveTestFile: TestFile {
     static let name = "comprehensive"

@@ -10,8 +10,8 @@ let package = Package(
     dependencies: [
         Basic.package,
         ArgumentParser.package,
-        Lexing.package,
-        Parsing.package
+        Lexer.package,
+        Parser.package
     ],
     targets: [
         .executableTarget(
@@ -19,8 +19,8 @@ let package = Package(
             dependencies: [
                 Basic.target,
                 ArgumentParser.target,
-                Lexing.target,
-                Parsing.target
+                Lexer.target,
+                Parser.target
             ]
         ),
     ]
@@ -31,7 +31,7 @@ enum Basic {
         name: "Basic",
         package: "Basic"
     )
-    
+
     static var package: Package.Dependency {
         return Package.Dependency.package(path: "Basic")
     }
@@ -42,7 +42,7 @@ enum ArgumentParser {
         name: "ArgumentParser",
         package: "swift-argument-parser"
     )
-    
+
     static var package: Package.Dependency {
         return Package.Dependency.package(
             url: "https://github.com/apple/swift-argument-parser.git",
@@ -51,24 +51,24 @@ enum ArgumentParser {
     }
 }
 
-enum Lexing {
+enum Lexer {
     static let target = Target.Dependency.product(
-        name: "Lexing",
-        package: "Lexing"
+        name: "Lexer",
+        package: "Lexer"
     )
-    
+
     static var package: Package.Dependency {
-        return Package.Dependency.package(path: "Lexing")
+        return Package.Dependency.package(path: "Lexer")
     }
 }
 
-enum Parsing {
+enum Parser {
     static let target = Target.Dependency.product(
-        name: "Parsing",
-        package: "Parsing"
+        name: "Parser",
+        package: "Parser"
     )
-    
+
     static var package: Package.Dependency {
-        return Package.Dependency.package(path: "Parsing")
+        return Package.Dependency.package(path: "Parser")
     }
 }

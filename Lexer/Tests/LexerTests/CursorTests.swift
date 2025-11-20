@@ -6,7 +6,7 @@
 //
 
 import Testing
-@testable import Lexing
+@testable import Lexer
 
 @Suite struct CursorTests {
     @Test func `cursor can be initialized with empty string`() {

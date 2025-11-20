@@ -6,7 +6,7 @@
 
 import ArgumentParser
 import Foundation
-import Lexing
+import Lexer
 
 @main
 struct CoolCommand: ParsableCommand {

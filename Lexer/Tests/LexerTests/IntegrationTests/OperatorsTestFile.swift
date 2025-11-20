@@ -8,7 +8,7 @@
 import Testing
 import Foundation
 import Diagnostics
-@testable import Lexing
+@testable import Lexer
 
 enum OperatorsTestFile: TestFile {
     static let name = "operators"
