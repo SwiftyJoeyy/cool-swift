@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "9128AB0B-0846-4C1A-9366-4E52D37642C8",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "ParserTests",
+        "name" : "ParserTests"
+      }
+    }
+  ],
+  "version" : 1
+}

@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "632B6F15-2796-4B51-A9AF-9F313D539E05",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "LexerTests",
+        "name" : "LexerTests"
+      }
+    }
+  ],
+  "version" : 1
+}
