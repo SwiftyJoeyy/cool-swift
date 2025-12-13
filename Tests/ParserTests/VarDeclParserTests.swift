@@ -16,20 +16,13 @@ import Lexer
 @Suite struct VarDeclParserTests {
 // MARK: - Functions
     private func parse(_ source: String) throws -> VarDecl {
-        var parser = try CoolParser(
-            lexer: CoolLexer(source, file: "test.cl"),
-            diagnostics: MockDiagEngine()
-        )
+        var parser = try CoolParser.new(source: source).parser
         return try VarDeclParser.parse(from: &parser)
     }
     private func parseWithDiags(
         _ source: String
     ) throws -> (decl: VarDecl, diags: [Diagnostic]) {
-        let diagEngine = MockDiagEngine()
-        var parser = try CoolParser(
-            lexer: CoolLexer(source, file: "test.cl"),
-            diagnostics: diagEngine
-        )
+        var (parser, diagEngine) = try CoolParser.new(source: source)
         return (try VarDeclParser.parse(from: &parser), diagEngine.diags)
     }
     

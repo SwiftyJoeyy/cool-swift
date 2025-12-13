@@ -30,12 +30,8 @@ protocol TestFile {
             )
         )
         let source = try String(contentsOf: url)
-        let diagEngine = MockDiagEngine()
         
-        var parser = try CoolParser(
-            lexer: CoolLexer(source, file: name + ".cl"),
-            diagnostics: diagEngine
-        )
+        var (parser, diagEngine) = try CoolParser.new(source: source)
         return (try parser.parse(), diagEngine.diags)
     }
     

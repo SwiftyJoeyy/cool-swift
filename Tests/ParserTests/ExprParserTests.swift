@@ -16,10 +16,7 @@ import Lexer
 @Suite struct ExprParserTests {
 // MARK: - Functions
     private func parse(_ source: String) throws -> Expr {
-        var parser = try CoolParser(
-            lexer: CoolLexer(source, file: "test.cl"),
-            diagnostics: MockDiagEngine()
-        )
+        var parser = try CoolParser.new(source: source).parser
         return try ExprParser.parse(from: &parser)
     }
     

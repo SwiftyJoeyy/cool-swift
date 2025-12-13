@@ -15,18 +15,18 @@ internal struct CoolParser {
     private let diagnostics: DiagnosticsEngine
     
     internal private(set) var currentToken: Token
-    private var lexer: CoolLexer
+    private var lexemes: Lexemes
     
-    internal init(lexer: CoolLexer, diagnostics: some DiagnosticsEngine) throws {
-        self.lexer = lexer
-        self.currentToken = try self.lexer.next()
+    internal init(lexemes: Lexemes, diagnostics: some DiagnosticsEngine) throws {
+        self.lexemes = lexemes
+        self.currentToken = try self.lexemes.consume()
         self.diagnostics = diagnostics
     }
     
     internal mutating func parse() throws -> SourceFile {
         var declarations = [ClassDecl]()
         
-        while !lexer.reachedEnd {
+        while !lexemes.reachedEnd {
             do throws(Diagnostic) {
                 guard currentToken.kind == .keyword(.class) else {
                     throw ParserError.unexpectedTopLevelDeclaration
@@ -42,7 +42,7 @@ internal struct CoolParser {
         
         return SourceFile(
             declarations: declarations,
-            location: SourceLocation(line: 1, column: 1, file: lexer.file)
+            location: SourceLocation(line: 1, column: 1, file: lexemes.file)
         )
     }
 }
@@ -50,23 +50,22 @@ internal struct CoolParser {
 extension CoolParser {
     @discardableResult
     internal mutating func advance() throws(Diagnostic) -> Token {
-        currentToken = try lexer.next()
+        currentToken = try lexemes.consume()
         return currentToken
     }
     
     @discardableResult
-    internal func advanced() throws(Diagnostic) -> Token {
-        var parser = self
-        return try parser.advance()
+    internal mutating func advanced() throws(Diagnostic) -> Token {
+        return try lexemes.peek()
     }
     
     @discardableResult internal mutating func advance(
         if predicate: (borrowing Token) -> Bool
     ) throws(Diagnostic) -> Token? {
-        var parser = self
-        let next = try parser.advance()
+        let next = try lexemes.peek()
         if predicate(next) {
-            self = parser
+            try lexemes.consume()
+            currentToken = next
             return next
         }
         return nil

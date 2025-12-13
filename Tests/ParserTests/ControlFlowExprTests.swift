@@ -16,20 +16,13 @@ import Lexer
 @Suite struct ControlFlowExprTests {
 // MARK: - Functions
     private func parse(_ source: String) throws -> Expr {
-        var parser = try CoolParser(
-            lexer: CoolLexer(source, file: "test.cl"),
-            diagnostics: MockDiagEngine()
-        )
+        var parser = try CoolParser.new(source: source).parser
         return try ExprParser.parse(from: &parser)
     }
     private func parseWithDiags(
         _ source: String
     ) throws -> (expr: Expr, diags: [Diagnostic]) {
-        let diagEngine = MockDiagEngine()
-        var parser = try CoolParser(
-            lexer: CoolLexer(source, file: "test.cl"),
-            diagnostics: diagEngine
-        )
+        var (parser, diagEngine) = try CoolParser.new(source: source)
         return (try ExprParser.parse(from: &parser), diagEngine.diags)
     }
     
