@@ -37,6 +37,15 @@ public enum TokenKind: Hashable, Equatable, Sendable {
 
 
 extension TokenKind {
+    public var isIdentifier: Bool {
+        switch self {
+            case .identifier:
+                return true
+            default:
+                return false
+        }
+    }
+    
     public var text: String {
         switch self {
             case .identifier(let name): return name

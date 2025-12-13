@@ -26,7 +26,7 @@ internal struct Cursor {
         SourceLocation(line: line, column: column, file: file)
     }
     
-    internal init(_ string: String, file: String = "") {
+    internal init(_ string: String, file: String) {
         self.input = Array(string.utf8)
         self.length = input.count
         self.file = file

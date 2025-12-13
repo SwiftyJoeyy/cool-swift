@@ -7,6 +7,7 @@
 import ArgumentParser
 import Foundation
 import Lexer
+import Basic
 
 @main
 struct CoolCommand: ParsableCommand {
@@ -15,18 +16,5 @@ struct CoolCommand: ParsableCommand {
     @Argument(transform: URL.init(fileURLWithPath:)) var fileURL: URL
     
     mutating func run() throws {
-        let contents = try String(contentsOf: fileURL)
-        var lexer = CoolLexer(contents)
-        
-        while !lexer.reachedEnd {
-            do {
-                _ = try lexer.next()
-            } catch {
-                if let location = error.location {
-                    print("Error at line \(location.line) column \(location.column)")
-                }
-                print(error.message)
-            }
-        }
     }
 }

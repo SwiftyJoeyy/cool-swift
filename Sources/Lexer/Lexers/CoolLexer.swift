@@ -22,14 +22,17 @@ public struct CoolLexer {
         PunctuationLexer.self,
         IdentifierLexer.self
     )
+    
+    public let file: String
     private var cursor: Cursor
     
     public var reachedEnd: Bool {
         return cursor.reachedEnd
     }
     
-    public init(_ string: String) {
-        self.cursor = Cursor(string)
+    public init(_ string: String, file: String) {
+        self.file = file
+        self.cursor = Cursor(string, file: file)
     }
     
     public mutating func next() throws(Diagnostic) -> Token {
@@ -85,7 +88,7 @@ public struct CoolLexer {
                 }
                 
                 if depth > 0 {
-                    throw Diagnostic(LexerError.unterminatedComment, location: start)
+                    throw LexerError.unterminatedComment.diagnostic(at: start)
                 }
                 continue
             }
