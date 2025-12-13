@@ -28,7 +28,7 @@ protocol TestFile {
             )
         )
         
-        var lexer = CoolLexer(try String(contentsOf: url))
+        var lexer = CoolLexer(try String(contentsOf: url), file: "")
         var tokens = [Token]()
         var diagnostics = [Diagnostic]()
         

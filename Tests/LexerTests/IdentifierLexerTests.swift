@@ -29,218 +29,218 @@ import Diagnostics
     
 // MARK: - Simple identifier tests
     @Test func `lex parses single letter identifier`() throws {
-        var cursor = Cursor("x")
+        var cursor = Cursor("x", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("x"))
     }
     
     @Test func `lex parses lowercase identifier`() throws {
-        var cursor = Cursor("count")
+        var cursor = Cursor("count", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("count"))
     }
     
     @Test func `lex parses uppercase identifier`() throws {
-        var cursor = Cursor("String")
+        var cursor = Cursor("String", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("String"))
     }
     
     @Test func `lex parses identifier with numbers`() throws {
-        var cursor = Cursor("var123")
+        var cursor = Cursor("var123", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("var123"))
     }
     
     @Test func `lex parses identifier with underscores`() throws {
-        var cursor = Cursor("my_var")
+        var cursor = Cursor("my_var", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("my_var"))
     }
     
     @Test func `lex parses identifier with multiple underscores`() throws {
-        var cursor = Cursor("__private__")
+        var cursor = Cursor("__private__", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("__private__"))
     }
     
     @Test func `lex parses identifier with mixed case`() throws {
-        var cursor = Cursor("myVariable")
+        var cursor = Cursor("myVariable", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("myVariable"))
     }
     
 // MARK: - Keyword tests
     @Test func `lex parses class keyword`() throws {
-        var cursor = Cursor("class")
+        var cursor = Cursor("class", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .keyword(.class))
     }
     
     @Test func `lex parses if keyword`() throws {
-        var cursor = Cursor("if")
+        var cursor = Cursor("if", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .keyword(.if))
     }
     
     @Test func `lex parses while keyword`() throws {
-        var cursor = Cursor("while")
+        var cursor = Cursor("while", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .keyword(.while))
     }
     
     @Test func `lex parses let keyword`() throws {
-        var cursor = Cursor("let")
+        var cursor = Cursor("let", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .keyword(.let))
     }
     
     @Test func `lex parses inherits keyword`() throws {
-        var cursor = Cursor("inherits")
+        var cursor = Cursor("inherits", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .keyword(.inherits))
     }
     
     @Test func `lex parses isvoid keyword`() throws {
-        var cursor = Cursor("isvoid")
+        var cursor = Cursor("isvoid", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .keyword(.isvoid))
     }
     
     @Test func `lex parses new keyword`() throws {
-        var cursor = Cursor("new")
+        var cursor = Cursor("new", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .keyword(.new))
     }
     
 // MARK: - Case insensitive keyword tests
     @Test func `lex parses uppercase class keyword`() throws {
-        var cursor = Cursor("CLASS")
+        var cursor = Cursor("CLASS", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .keyword(.class))
     }
     
     @Test func `lex parses mixed case while keyword`() throws {
-        var cursor = Cursor("While")
+        var cursor = Cursor("While", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .keyword(.while))
     }
     
     @Test func `lex parses mixed case IF keyword`() throws {
-        var cursor = Cursor("If")
+        var cursor = Cursor("If", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .keyword(.if))
     }
     
 // MARK: - Boolean keyword tests
     @Test func `lex parses true keyword`() throws {
-        var cursor = Cursor("true")
+        var cursor = Cursor("true", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .keyword(.true))
     }
     
     @Test func `lex parses false keyword`() throws {
-        var cursor = Cursor("false")
+        var cursor = Cursor("false", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .keyword(.false))
     }
     
     @Test func `lex parses True as identifier not keyword`() throws {
-        var cursor = Cursor("True")
+        var cursor = Cursor("True", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("True"))
     }
     
     @Test func `lex parses FALSE as identifier not keyword`() throws {
-        var cursor = Cursor("FALSE")
+        var cursor = Cursor("FALSE", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("FALSE"))
     }
     
     @Test func `lex parses tRue as identifier not keyword`() throws {
-        var cursor = Cursor("tRue")
+        var cursor = Cursor("tRue", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("tRue"))
     }
     
 // MARK: - Identifier followed by operators
     @Test func `lex parses identifier followed by plus`() throws {
-        var cursor = Cursor("x+")
+        var cursor = Cursor("x+", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("x"))
     }
     
     @Test func `lex parses identifier followed by minus`() throws {
-        var cursor = Cursor("count-")
+        var cursor = Cursor("count-", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("count"))
     }
     
     @Test func `lex parses identifier followed by less than`() throws {
-        var cursor = Cursor("x<")
+        var cursor = Cursor("x<", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("x"))
     }
     
     @Test func `lex parses identifier followed by equal`() throws {
-        var cursor = Cursor("var=")
+        var cursor = Cursor("var=", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("var"))
     }
     
 // MARK: - Identifier followed by punctuation
     @Test func `lex parses identifier followed by dot`() throws {
-        var cursor = Cursor("obj.")
+        var cursor = Cursor("obj.", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("obj"))
     }
     
     @Test func `lex parses identifier followed by left paren`() throws {
-        var cursor = Cursor("method(")
+        var cursor = Cursor("method(", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("method"))
     }
     
     @Test func `lex parses identifier followed by colon`() throws {
-        var cursor = Cursor("x:")
+        var cursor = Cursor("x:", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("x"))
     }
     
     @Test func `lex parses identifier followed by semicolon`() throws {
-        var cursor = Cursor("var;")
+        var cursor = Cursor("var;", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("var"))
     }
     
     @Test func `lex parses identifier followed by comma`() throws {
-        var cursor = Cursor("arg,")
+        var cursor = Cursor("arg,", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("arg"))
     }
     
 // MARK: - Identifier followed by whitespace
     @Test func `lex parses identifier followed by space`() throws {
-        var cursor = Cursor("name ")
+        var cursor = Cursor("name ", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("name"))
     }
     
     @Test func `lex parses identifier followed by newline`() throws {
-        var cursor = Cursor("value\n")
+        var cursor = Cursor("value\n", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("value"))
     }
     
     @Test func `lex parses identifier followed by tab`() throws {
-        var cursor = Cursor("data\t")
+        var cursor = Cursor("data\t", file: "")
         let token = try IdentifierLexer.lex(for: &cursor)
         #expect(token.kind == .identifier("data"))
     }
     
 // MARK: - Error tests
     @Test func `lex throws on identifier with dollar sign`() throws {
-        var cursor = Cursor("var$name")
+        var cursor = Cursor("var$name", file: "")
         let diag = try #require(throws: Diagnostic.self) {
             _ = try IdentifierLexer.lex(for: &cursor)
         }
@@ -248,7 +248,7 @@ import Diagnostics
     }
     
     @Test func `lex throws on identifier with hash`() throws {
-        var cursor = Cursor("name#value")
+        var cursor = Cursor("name#value", file: "")
         let diag = try #require(throws: Diagnostic.self) {
             _ = try IdentifierLexer.lex(for: &cursor)
         }

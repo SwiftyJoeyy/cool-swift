@@ -33,62 +33,62 @@ import Diagnostics
     
 // MARK: - Single character punctuation tests
     @Test func `lex parses at symbol`() throws {
-        var cursor = Cursor("@")
+        var cursor = Cursor("@", file: "")
         let token = try PunctuationLexer.lex(for: &cursor)
         #expect(token.kind == .at)
     }
     
     @Test func `lex parses colon`() throws {
-        var cursor = Cursor(":")
+        var cursor = Cursor(":", file: "")
         let token = try PunctuationLexer.lex(for: &cursor)
         #expect(token.kind == .colon)
     }
     
     @Test func `lex parses comma`() throws {
-        var cursor = Cursor(",")
+        var cursor = Cursor(",", file: "")
         let token = try PunctuationLexer.lex(for: &cursor)
         #expect(token.kind == .comma)
     }
     
     @Test func `lex parses dot`() throws {
-        var cursor = Cursor(".")
+        var cursor = Cursor(".", file: "")
         let token = try PunctuationLexer.lex(for: &cursor)
         #expect(token.kind == .dot)
     }
     
     @Test func `lex parses left brace`() throws {
-        var cursor = Cursor("{")
+        var cursor = Cursor("{", file: "")
         let token = try PunctuationLexer.lex(for: &cursor)
         #expect(token.kind == .leftBrace)
     }
     
     @Test func `lex parses left paren`() throws {
-        var cursor = Cursor("(")
+        var cursor = Cursor("(", file: "")
         let token = try PunctuationLexer.lex(for: &cursor)
         #expect(token.kind == .leftParen)
     }
     
     @Test func `lex parses right brace`() throws {
-        var cursor = Cursor("}")
+        var cursor = Cursor("}", file: "")
         let token = try PunctuationLexer.lex(for: &cursor)
         #expect(token.kind == .rightBrace)
     }
     
     @Test func `lex parses right paren`() throws {
-        var cursor = Cursor(")")
+        var cursor = Cursor(")", file: "")
         let token = try PunctuationLexer.lex(for: &cursor)
         #expect(token.kind == .rightParen)
     }
     
     @Test func `lex parses semicolon`() throws {
-        var cursor = Cursor(";")
+        var cursor = Cursor(";", file: "")
         let token = try PunctuationLexer.lex(for: &cursor)
         #expect(token.kind == .semicolon)
     }
     
 // MARK: - Punctuation followed by other characters
     @Test func `lex parses at followed by identifier`() throws {
-        var cursor = Cursor("@Object")
+        var cursor = Cursor("@Object", file: "")
         let token = try PunctuationLexer.lex(for: &cursor)
         #expect(token.kind == .at)
         cursor.advance()
@@ -96,7 +96,7 @@ import Diagnostics
     }
     
     @Test func `lex parses colon followed by type`() throws {
-        var cursor = Cursor(": Int")
+        var cursor = Cursor(": Int", file: "")
         let token = try PunctuationLexer.lex(for: &cursor)
         #expect(token.kind == .colon)
         cursor.advance()
@@ -104,7 +104,7 @@ import Diagnostics
     }
     
     @Test func `lex parses comma followed by space`() throws {
-        var cursor = Cursor(", ")
+        var cursor = Cursor(", ", file: "")
         let token = try PunctuationLexer.lex(for: &cursor)
         #expect(token.kind == .comma)
         cursor.advance()
@@ -112,7 +112,7 @@ import Diagnostics
     }
     
     @Test func `lex parses dot followed by identifier`() throws {
-        var cursor = Cursor(".method")
+        var cursor = Cursor(".method", file: "")
         let token = try PunctuationLexer.lex(for: &cursor)
         #expect(token.kind == .dot)
         cursor.advance()
@@ -120,7 +120,7 @@ import Diagnostics
     }
     
     @Test func `lex parses semicolon followed by newline`() throws {
-        var cursor = Cursor(";\n")
+        var cursor = Cursor(";\n", file: "")
         let token = try PunctuationLexer.lex(for: &cursor)
         #expect(token.kind == .semicolon)
         cursor.advance()
@@ -129,7 +129,7 @@ import Diagnostics
     
 // MARK: - Punctuation sequences
     @Test func `lex parses left paren followed by right paren`() throws {
-        var cursor = Cursor("()")
+        var cursor = Cursor("()", file: "")
         let token1 = try PunctuationLexer.lex(for: &cursor)
         #expect(token1.kind == .leftParen)
         cursor.advance()
@@ -138,7 +138,7 @@ import Diagnostics
     }
     
     @Test func `lex parses left brace followed by right brace`() throws {
-        var cursor = Cursor("{}")
+        var cursor = Cursor("{}", file: "")
         let token1 = try PunctuationLexer.lex(for: &cursor)
         #expect(token1.kind == .leftBrace)
         cursor.advance()
@@ -147,7 +147,7 @@ import Diagnostics
     }
     
     @Test func `lex parses method call punctuation`() throws {
-        var cursor = Cursor(".foo()")
+        var cursor = Cursor(".foo()", file: "")
         let token1 = try PunctuationLexer.lex(for: &cursor)
         #expect(token1.kind == .dot)
     }

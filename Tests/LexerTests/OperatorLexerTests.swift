@@ -31,99 +31,99 @@ import Diagnostics
     
 // MARK: - Single-character operator tests
     @Test func `lex parses plus operator`() throws {
-        var cursor = Cursor("+")
+        var cursor = Cursor("+", file: "")
         let token = try OperatorLexer.lex(for: &cursor)
         #expect(token.kind == .plus)
     }
     
     @Test func `lex parses minus operator`() throws {
-        var cursor = Cursor("-")
+        var cursor = Cursor("-", file: "")
         let token = try OperatorLexer.lex(for: &cursor)
         #expect(token.kind == .minus)
     }
     
     @Test func `lex parses star operator`() throws {
-        var cursor = Cursor("*")
+        var cursor = Cursor("*", file: "")
         let token = try OperatorLexer.lex(for: &cursor)
         #expect(token.kind == .star)
     }
     
     @Test func `lex parses slash operator`() throws {
-        var cursor = Cursor("/")
+        var cursor = Cursor("/", file: "")
         let token = try OperatorLexer.lex(for: &cursor)
         #expect(token.kind == .slash)
     }
     
     @Test func `lex parses tilde operator`() throws {
-        var cursor = Cursor("~")
+        var cursor = Cursor("~", file: "")
         let token = try OperatorLexer.lex(for: &cursor)
         #expect(token.kind == .tilde)
     }
     
     @Test func `lex parses equal when not followed by arrow`() throws {
-        var cursor = Cursor("=")
+        var cursor = Cursor("=", file: "")
         let token = try OperatorLexer.lex(for: &cursor)
         #expect(token.kind == .equal)
     }
     
     @Test func `lex parses equal when followed by space`() throws {
-        var cursor = Cursor("= ")
+        var cursor = Cursor("= ", file: "")
         let token = try OperatorLexer.lex(for: &cursor)
         #expect(token.kind == .equal)
     }
     
     @Test func `lex parses lessThan when not followed by dash or equal`() throws {
-        var cursor = Cursor("<")
+        var cursor = Cursor("<", file: "")
         let token = try OperatorLexer.lex(for: &cursor)
         #expect(token.kind == .lessThan)
     }
     
     @Test func `lex parses lessThan when followed by space`() throws {
-        var cursor = Cursor("< ")
+        var cursor = Cursor("< ", file: "")
         let token = try OperatorLexer.lex(for: &cursor)
         #expect(token.kind == .lessThan)
     }
     
 // MARK: - Two-character operator tests
     @Test func `lex parses arrow operator`() throws {
-        var cursor = Cursor("=>")
+        var cursor = Cursor("=>", file: "")
         let token = try OperatorLexer.lex(for: &cursor)
         #expect(token.kind == .arrow)
     }
     
     @Test func `lex parses arrow operator followed by space`() throws {
-        var cursor = Cursor("=> ")
+        var cursor = Cursor("=> ", file: "")
         let token = try OperatorLexer.lex(for: &cursor)
         #expect(token.kind == .arrow)
     }
     
     @Test func `lex parses assign operator`() throws {
-        var cursor = Cursor("<-")
+        var cursor = Cursor("<-", file: "")
         let token = try OperatorLexer.lex(for: &cursor)
         #expect(token.kind == .assign)
     }
     
     @Test func `lex parses assign operator followed by space`() throws {
-        var cursor = Cursor("<- ")
+        var cursor = Cursor("<- ", file: "")
         let token = try OperatorLexer.lex(for: &cursor)
         #expect(token.kind == .assign)
     }
     
     @Test func `lex parses lessThanOrEqual operator`() throws {
-        var cursor = Cursor("<=")
+        var cursor = Cursor("<=", file: "")
         let token = try OperatorLexer.lex(for: &cursor)
         #expect(token.kind == .lessThanOrEqual)
     }
     
     @Test func `lex parses lessThanOrEqual operator followed by space`() throws {
-        var cursor = Cursor("<= ")
+        var cursor = Cursor("<= ", file: "")
         let token = try OperatorLexer.lex(for: &cursor)
         #expect(token.kind == .lessThanOrEqual)
     }
     
 // MARK: - Operator sequence tests
     @Test func `lex parses plus followed by minus`() throws {
-        var cursor = Cursor("+-")
+        var cursor = Cursor("+-", file: "")
         let token1 = try OperatorLexer.lex(for: &cursor)
         #expect(token1.kind == .plus)
         cursor.advance()
@@ -132,7 +132,7 @@ import Diagnostics
     }
     
     @Test func `lex parses operators in expression`() throws {
-        var cursor = Cursor("*5")
+        var cursor = Cursor("*5", file: "")
         let token = try OperatorLexer.lex(for: &cursor)
         #expect(token.kind == .star)
         cursor.advance()

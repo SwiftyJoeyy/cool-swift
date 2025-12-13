@@ -21,62 +21,62 @@ import Diagnostics
     
 // MARK: - Parsing tests
     @Test func `lex parses simple string literal`() throws {
-        var cursor = Cursor("\"hello\"")
+        var cursor = Cursor("\"hello\"", file: "")
         let token = try StringLiteralLexer.lex(for: &cursor)
         #expect(token.kind == .stringLiteral("hello"))
     }
     
     @Test func `lex parses empty string literal`() throws {
-        var cursor = Cursor("\"\"")
+        var cursor = Cursor("\"\"", file: "")
         let token = try StringLiteralLexer.lex(for: &cursor)
         #expect(token.kind == .stringLiteral(""))
     }
     
     @Test func `lex parses string with escaped newline`() throws {
-        var cursor = Cursor("\"hello\\nworld\"")
+        var cursor = Cursor("\"hello\\nworld\"", file: "")
         let token = try StringLiteralLexer.lex(for: &cursor)
         #expect(token.kind == .stringLiteral("hello\nworld"))
     }
     
     @Test func `lex parses string with escaped tab`() throws {
-        var cursor = Cursor("\"hello\\tworld\"")
+        var cursor = Cursor("\"hello\\tworld\"", file: "")
         let token = try StringLiteralLexer.lex(for: &cursor)
         #expect(token.kind == .stringLiteral("hello\tworld"))
     }
     
     @Test func `lex parses string with escaped backspace`() throws {
-        var cursor = Cursor("\"hello\\bworld\"")
+        var cursor = Cursor("\"hello\\bworld\"", file: "")
         let token = try StringLiteralLexer.lex(for: &cursor)
         #expect(token.kind == .stringLiteral("hello\u{08}world"))
     }
     
     @Test func `lex parses string with escaped formfeed`() throws {
-        var cursor = Cursor("\"hello\\fworld\"")
+        var cursor = Cursor("\"hello\\fworld\"", file: "")
         let token = try StringLiteralLexer.lex(for: &cursor)
         #expect(token.kind == .stringLiteral("hello\u{0C}world"))
     }
     
     @Test func `lex parses string with escaped quote`() throws {
-        var cursor = Cursor("\"hello\\\"world\"")
+        var cursor = Cursor("\"hello\\\"world\"", file: "")
         let token = try StringLiteralLexer.lex(for: &cursor)
         #expect(token.kind == .stringLiteral("hello\"world"))
     }
     
     @Test func `lex parses string with escaped backslash`() throws {
-        var cursor = Cursor("\"hello\\\\world\"")
+        var cursor = Cursor("\"hello\\\\world\"", file: "")
         let token = try StringLiteralLexer.lex(for: &cursor)
         #expect(token.kind == .stringLiteral("hello\\world"))
     }
     
     @Test func `lex parses string with escaped newline in source`() throws {
-        var cursor = Cursor("\"\\\n\"")
+        var cursor = Cursor("\"\\\n\"", file: "")
         let token = try StringLiteralLexer.lex(for: &cursor)
         #expect(token.kind == .stringLiteral(""))
     }
     
 // MARK: - Error tests
     @Test func `lex throws on unescaped newline`() throws {
-        var cursor = Cursor("\"hello\nworld\"")
+        var cursor = Cursor("\"hello\nworld\"", file: "")
         let diag = try #require(throws: Diagnostic.self) {
             _ = try StringLiteralLexer.lex(for: &cursor)
         }
@@ -84,7 +84,7 @@ import Diagnostics
     }
     
     @Test func `lex throws on missing end quote`() throws {
-        var cursor = Cursor("\"hello")
+        var cursor = Cursor("\"hello", file: "")
         let diag = try #require(throws: Diagnostic.self) {
             _ = try StringLiteralLexer.lex(for: &cursor)
         }
@@ -92,7 +92,7 @@ import Diagnostics
     }
     
     @Test func `lex throws on missing end quote after backslash`() throws {
-        var cursor = Cursor("\"hello \\")
+        var cursor = Cursor("\"hello \\", file: "")
         let diag = try #require(throws: Diagnostic.self) {
             _ = try StringLiteralLexer.lex(for: &cursor)
         }
@@ -100,7 +100,7 @@ import Diagnostics
     }
     
     @Test func `lex throws on null character in string`() throws {
-        var cursor = Cursor("\"hello\0world\"")
+        var cursor = Cursor("\"hello\0world\"", file: "")
         let diag = try #require(throws: Diagnostic.self) {
             _ = try StringLiteralLexer.lex(for: &cursor)
         }
@@ -109,7 +109,7 @@ import Diagnostics
     
     @Test func `lex throws on string exceeding 1024 characters`() throws {
         let longString = "\"" + String(repeating: "a", count: 1025) + "\""
-        var cursor = Cursor(longString)
+        var cursor = Cursor(longString, file: "")
         let diag = try #require(throws: Diagnostic.self) {
             _ = try StringLiteralLexer.lex(for: &cursor)
         }
