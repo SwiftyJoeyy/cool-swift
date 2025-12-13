@@ -113,11 +113,18 @@ enum Parser {
             dependencies: [
                 AST.dependency,
                 Basic.dependency,
-                Diagnostics.dependency
+                Diagnostics.dependency,
+                Lexer.dependency
             ]
         )
     }
     static var tests: Target {
-        .testTarget(name: "ParserTests", dependencies: [Parser.dependency])
+        .testTarget(
+            name: "ParserTests",
+            dependencies: [
+                Parser.dependency
+            ],
+            resources: [.copy("IntegrationTests/Resources")]
+        )
     }
 }

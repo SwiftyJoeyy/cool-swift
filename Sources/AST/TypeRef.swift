@@ -12,7 +12,16 @@ public protocol TypeRef: ASTNode {
     
 }
 
-public struct IdentifierType: TypeRef {
+public struct TypeIdentifier: TypeRef {
     public let name: String
     public let location: SourceLocation
+    
+    public var description: String {
+        return name
+    }
+    
+    public init(name: String, location: SourceLocation) {
+        self.name = name
+        self.location = location
+    }
 }
