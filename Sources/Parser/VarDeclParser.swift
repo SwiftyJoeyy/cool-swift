@@ -13,9 +13,9 @@ import Lexer
 
 internal struct VarDeclParser {
     internal static func parse(from parser: inout CoolParser) throws(Diagnostic) -> VarDecl {
-        let token = parser.currentToken
-        guard case .identifier(let name) = token.kind else {
-            throw ParserError.expectedVarName.diagnostic(at: token.location)
+        let location = parser.currentToken.location
+        guard case .identifier(let name) = parser.currentToken.kind else {
+            throw ParserError.expectedVarName.diagnostic(at: location)
         }
         
         let colonLocation: SourceLocation
@@ -28,7 +28,7 @@ internal struct VarDeclParser {
         
         let typeToken = try parser.advance()
         guard case .identifier(let type) = typeToken.kind else {
-            throw ParserError.expectedTypeAnnotation.diagnostic(at: token.location)
+            throw ParserError.expectedTypeAnnotation.diagnostic(at: location)
         }
         
         var initializer: InitializerClause?
@@ -37,7 +37,7 @@ internal struct VarDeclParser {
         }
         
         return VarDecl(
-            name: name,
+            name: Identifier(value: name, location: location),
             typeAnnotation: TypeAnnotation(
                 type: TypeIdentifier(
                     name: type,
@@ -46,7 +46,7 @@ internal struct VarDeclParser {
                 location: colonLocation
             ),
             initializer: initializer,
-            location: token.location
+            location: location
         )
     }
     

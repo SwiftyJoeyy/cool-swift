@@ -32,7 +32,7 @@ import Lexer
         let source = "class Main { };"
         let classDecl = try parse(source)
         
-        #expect(classDecl.name == "Main")
+        #expect(classDecl.name.value == "Main")
         #expect(classDecl.inheritance == nil)
         #expect(classDecl.membersBlock.members.isEmpty)
     }
@@ -42,7 +42,7 @@ import Lexer
         let source = "class Child inherits Parent { };"
         let classDecl = try parse(source)
         
-        #expect(classDecl.name == "Child")
+        #expect(classDecl.name.value == "Child")
         #expect(classDecl.inheritance != nil)
         #expect(classDecl.inheritance?.inheritedType.description == "Parent")
     }
@@ -60,7 +60,7 @@ import Lexer
             try #require(classDecl.membersBlock.members.count == 1)
             let varDecl = try #require(classDecl.membersBlock.members[0] as? VarDecl)
             
-            #expect(varDecl.name == "x")
+            #expect(varDecl.name.value == "x")
             #expect(varDecl.typeAnnotation.type.description == "Int")
             #expect(varDecl.initializer == nil)
         }
@@ -76,7 +76,7 @@ import Lexer
             try #require(classDecl.membersBlock.members.count == 1)
             let varDecl = try #require(classDecl.membersBlock.members[0] as? VarDecl)
             
-            #expect(varDecl.name == "x")
+            #expect(varDecl.name.value == "x")
             #expect(varDecl.initializer != nil)
         }
     }
@@ -93,7 +93,7 @@ import Lexer
         
         let members = classDecl.membersBlock.members.compactMap({$0 as? VarDecl})
         try #require(members.count == 3)
-        #expect(members.map(\.name) == ["x", "y", "z"])
+        #expect(members.map(\.name.value) == ["x", "y", "z"])
         
         let names = members.compactMap({$0.typeAnnotation.type.description})
         #expect(names == ["Int", "String", "Bool"])
@@ -109,7 +109,7 @@ import Lexer
         
         let members = classDecl.membersBlock.members.compactMap({$0 as? FuncDecl})
         try #require(members.count == 1)
-        #expect(members[0].name == "main")
+        #expect(members[0].name.value == "main")
     }
     
     @Test func `parses class with multiple funcs`() throws {
@@ -124,7 +124,7 @@ import Lexer
         
         let members = classDecl.membersBlock.members.compactMap({$0 as? FuncDecl})
         try #require(members.count == 3)
-        #expect(members.map(\.name) == ["main", "main2", "main3"])
+        #expect(members.map(\.name.value) == ["main", "main2", "main3"])
     }
     
     @Test func `parses class with mixed members`() throws {
@@ -161,7 +161,7 @@ import Lexer
         
         let (classDecl, diags) = try parseWithDiags(source)
         
-        #expect(classDecl.name == "Main")
+        #expect(classDecl.name.value == "Main")
         
         try #require(diags.count == 1)
         #expect(diags[0].id ==  ParserError.expectedSymbol(.leftBrace).id)
@@ -206,7 +206,7 @@ import Lexer
         
         let (classDecl, diags) = try parseWithDiags(source)
         
-        #expect(classDecl.name == "Main")
+        #expect(classDecl.name.value == "Main")
         
         let members = classDecl.membersBlock.members
         try #require(members.count == 2)
@@ -228,7 +228,7 @@ import Lexer
         
         let (classDecl, diags) = try parseWithDiags(source)
         
-        #expect(classDecl.name == "Main")
+        #expect(classDecl.name.value == "Main")
         
         let members = classDecl.membersBlock.members
         try #require(members.count == 1)
@@ -248,7 +248,7 @@ import Lexer
             
             let (classDecl, diags) = try parseWithDiags(source)
             
-            #expect(classDecl.name == "Main")
+            #expect(classDecl.name.value == "Main")
             
             let members = classDecl.membersBlock.members
             try #require(members.count == 0)
@@ -267,7 +267,7 @@ import Lexer
             
             let (classDecl, diags) = try parseWithDiags(source)
             
-            #expect(classDecl.name == "Main")
+            #expect(classDecl.name.value == "Main")
             
             let members = classDecl.membersBlock.members
             try #require(members.count == 0)

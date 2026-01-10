@@ -31,7 +31,7 @@ import Lexer
         let source = "x : Int"
         let varDecl = try parse(source)
         
-        #expect(varDecl.name == "x")
+        #expect(varDecl.name.value == "x")
         #expect(varDecl.typeAnnotation.type.description == "Int")
         #expect(varDecl.initializer == nil)
     }
@@ -40,7 +40,7 @@ import Lexer
         let source = "x : Int <- 5"
         let varDecl = try parse(source)
         
-        #expect(varDecl.name == "x")
+        #expect(varDecl.name.value == "x")
         #expect(varDecl.typeAnnotation.type.description == "Int")
         #expect(varDecl.initializer?.expr is IntegerLiteralExpr)
     }
@@ -97,7 +97,7 @@ import Lexer
         
         let (varDecl, diags) = try parseWithDiags(source)
         
-        #expect(varDecl.name == "x")
+        #expect(varDecl.name.value == "x")
         #expect(varDecl.typeAnnotation.type.description == "Int")
         
         try #require(diags.count == 1)

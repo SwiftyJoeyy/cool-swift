@@ -31,7 +31,7 @@ import Lexer
         let source = "main() : Int { 42 }"
         let funcDecl = try parse(source)
         
-        #expect(funcDecl.name == "main")
+        #expect(funcDecl.name.value == "main")
         #expect(funcDecl.parameters.parameters.isEmpty)
     }
     
@@ -39,13 +39,13 @@ import Lexer
         let source = "add(x : Int) : Int { x + 1 }"
         let funcDecl = try parse(source)
         
-        #expect(funcDecl.name == "add")
+        #expect(funcDecl.name.value == "add")
         
         let params = funcDecl.parameters.parameters
         try #require(params.count == 1)
         
         let param = params[0]
-        #expect(param.name == "x")
+        #expect(param.name.value == "x")
         #expect(param.type.description == "Int")
     }
     
@@ -54,7 +54,7 @@ import Lexer
         let source = "calculate(x : Int, y : String, z : Bool) : Object { x }"
         let funcDecl = try parse(source)
         
-        #expect(funcDecl.name == "calculate")
+        #expect(funcDecl.name.value == "calculate")
         
         let params = funcDecl.parameters.parameters
         try #require(params.count == expectedParams.count)
@@ -62,7 +62,7 @@ import Lexer
         for i in 0..<expectedParams.count {
             let param = params[i]
             let expectedParam = expectedParams[i]
-            #expect(param.name == expectedParam.0)
+            #expect(param.name.value == expectedParam.0)
             #expect(param.type.description == expectedParam.1)
         }
     }
@@ -215,5 +215,14 @@ import Lexer
             _ = try parse(source)
         }
         #expect(error?.id == ParserError.expectedSymbol(.rightParen).id)
+    }
+    
+    @Test func `reports error on multiple exprs in body`() throws {
+        let source = "foo(x : Int, y : String) : Int { 42; 45; }"
+        
+        let error = #expect(throws: Diagnostic.self) {
+            _ = try parse(source)
+        }
+        #expect(error?.id == ParserError.expectedSymbol(.rightBrace).id)
     }
 }

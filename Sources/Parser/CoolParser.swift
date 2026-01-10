@@ -11,19 +11,19 @@ import Basic
 import Diagnostics
 import Lexer
 
-internal struct CoolParser {
+public struct CoolParser {
     private let diagnostics: DiagnosticsEngine
     
     internal private(set) var currentToken: Token
     private var lexemes: Lexemes
     
-    internal init(lexemes: Lexemes, diagnostics: some DiagnosticsEngine) throws {
+    public init(lexemes: Lexemes, diagnostics: some DiagnosticsEngine) throws(Diagnostic) {
         self.lexemes = lexemes
         self.currentToken = try self.lexemes.consume()
         self.diagnostics = diagnostics
     }
     
-    internal mutating func parse() throws -> SourceFile {
+    public mutating func parse() throws(Diagnostic) -> SourceFile {
         var declarations = [ClassDecl]()
         
         while !lexemes.reachedEnd {

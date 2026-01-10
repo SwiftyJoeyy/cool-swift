@@ -33,7 +33,7 @@ import Lexer
         let letExpr = try #require(expr as? LetExpr)
         let binding = try #require(letExpr.bindings.first)
         
-        #expect(binding.name == "x")
+        #expect(binding.name.value == "x")
         #expect(binding.typeAnnotation.type.description == "Int")
         #expect(letExpr.body is DeclRefExpr)
     }
@@ -44,7 +44,7 @@ import Lexer
         let letExpr = try #require(expr as? LetExpr)
         let binding = try #require(letExpr.bindings.first)
         
-        #expect(binding.name == "x")
+        #expect(binding.name.value == "x")
         #expect(binding.typeAnnotation.type.description == "Int")
         #expect(binding.initializer?.expr.description == "5")
     }
@@ -57,11 +57,11 @@ import Lexer
         let firstBinding = letExpr.bindings[0]
         let secondBinding = letExpr.bindings[1]
         
-        #expect(firstBinding.name == "x")
+        #expect(firstBinding.name.value == "x")
         #expect(firstBinding.typeAnnotation.type.description == "Int")
         #expect(firstBinding.initializer?.expr is IntegerLiteralExpr)
         
-        #expect(secondBinding.name == "y")
+        #expect(secondBinding.name.value == "y")
         #expect(secondBinding.typeAnnotation.type.description == "String")
         #expect(secondBinding.initializer == nil)
     }
@@ -81,7 +81,7 @@ import Lexer
         let innerBinding = try #require(innerLetExpr.bindings.first)
        
         #expect(innerLetExpr.body is OperationExpr)
-        #expect(innerBinding.name == "y")
+        #expect(innerBinding.name.value == "y")
         #expect(innerBinding.typeAnnotation.type.description == "Int")
         #expect(innerBinding.initializer?.expr is IntegerLiteralExpr)
     }
@@ -111,7 +111,7 @@ import Lexer
         try #require(caseExpr.branches.count == 1)
         
         let branch = caseExpr.branches[0]
-        #expect(branch.binding.name == "y")
+        #expect(branch.binding.name.value == "y")
         #expect(branch.binding.typeAnnotation.type.description == "Int")
         #expect(branch.body is IntegerLiteralExpr)
     }
@@ -135,7 +135,7 @@ import Lexer
         for i in 0..<expectedBranches.count {
             let branch = caseExpr.branches[i]
             let expBranch = expectedBranches[i]
-            #expect(branch.binding.name == expBranch.name)
+            #expect(branch.binding.name.value == expBranch.name)
             #expect(branch.binding.typeAnnotation.type.description == expBranch.type)
             #expect(branch.body.description == expBranch.expr)
         }
@@ -155,7 +155,7 @@ import Lexer
         try #require(caseExpr.branches.count == 1)
         
         let branch = caseExpr.branches[0]
-        #expect(branch.binding.name == "y")
+        #expect(branch.binding.name.value == "y")
         #expect(branch.binding.typeAnnotation.type.description == "Int")
         #expect(branch.body is OperationExpr)
     }

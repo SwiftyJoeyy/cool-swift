@@ -22,7 +22,7 @@ enum ExpressionsTestFile: TestFile {
     }
     
     private static func validateExprTestClass(classDecl: ClassDecl) throws {
-        #expect(classDecl.name == "ExprTest")
+        #expect(classDecl.name.value == "ExprTest")
         #expect(classDecl.inheritance == nil)
         
         let methods = classDecl.membersBlock.members.compactMap { $0 as? FuncDecl }
@@ -36,20 +36,20 @@ enum ExpressionsTestFile: TestFile {
     }
     
     private static func validateComputeMethod(method: FuncDecl) throws {
-        #expect(method.name == "compute")
+        #expect(method.name.value == "compute")
         try #require(method.parameters.parameters.count == 2)
-        #expect(method.parameters.parameters[0].name == "x")
+        #expect(method.parameters.parameters[0].name.value == "x")
         #expect(method.parameters.parameters[0].type.description == "Int")
-        #expect(method.parameters.parameters[1].name == "y")
+        #expect(method.parameters.parameters[1].name.value == "y")
         #expect(method.parameters.parameters[1].type.description == "Int")
         #expect(method.returnClause.type.description == "Bool")
         #expect(method.body is OperationExpr)
     }
     
     private static func validateCheckMethod(method: FuncDecl) throws {
-        #expect(method.name == "check")
+        #expect(method.name.value == "check")
         try #require(method.parameters.parameters.count == 1)
-        #expect(method.parameters.parameters[0].name == "val")
+        #expect(method.parameters.parameters[0].name.value == "val")
         #expect(method.parameters.parameters[0].type.description == "Int")
         #expect(method.returnClause.type.description == "String")
         #expect(method.body is IfExpr)
@@ -61,32 +61,32 @@ enum ExpressionsTestFile: TestFile {
     }
     
     private static func validateFactorialMethod(method: FuncDecl) throws {
-        #expect(method.name == "factorial")
+        #expect(method.name.value == "factorial")
         try #require(method.parameters.parameters.count == 1)
-        #expect(method.parameters.parameters[0].name == "n")
+        #expect(method.parameters.parameters[0].name.value == "n")
         #expect(method.returnClause.type.description == "Int")
         #expect(method.body is LetExpr)
         
         let letExpr = try #require(method.body as? LetExpr)
         try #require(letExpr.bindings.count == 1)
-        #expect(letExpr.bindings[0].name == "result")
+        #expect(letExpr.bindings[0].name.value == "result")
         #expect(letExpr.body is LetExpr)
     }
     
     private static func validateCalculateMethod(method: FuncDecl) throws {
-        #expect(method.name == "calculate")
+        #expect(method.name.value == "calculate")
         #expect(method.parameters.parameters.isEmpty)
         #expect(method.returnClause.type.description == "Int")
         #expect(method.body is LetExpr)
         
         let letExpr = try #require(method.body as? LetExpr)
         try #require(letExpr.bindings.count == 1)
-        #expect(letExpr.bindings[0].name == "x")
+        #expect(letExpr.bindings[0].name.value == "x")
         #expect(letExpr.body is LetExpr)
     }
     
     private static func validateCreateMethod(method: FuncDecl) throws {
-        #expect(method.name == "create")
+        #expect(method.name.value == "create")
         #expect(method.parameters.parameters.isEmpty)
         #expect(method.returnClause.type.description == "Object")
         #expect(method.body is NewExpr)

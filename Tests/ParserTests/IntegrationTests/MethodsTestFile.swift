@@ -22,7 +22,7 @@ enum MethodsTestFile: TestFile {
     }
     
     private static func validateCalculatorClass(classDecl: ClassDecl) throws {
-        #expect(classDecl.name == "Calculator")
+        #expect(classDecl.name.value == "Calculator")
         #expect(classDecl.inheritance == nil)
         
         let methods = classDecl.membersBlock.members.compactMap { $0 as? FuncDecl }
@@ -38,7 +38,7 @@ enum MethodsTestFile: TestFile {
     }
     
     private static func validateResetMethod(method: FuncDecl) throws {
-        #expect(method.name == "reset")
+        #expect(method.name.value == "reset")
         #expect(method.parameters.parameters.isEmpty)
         #expect(method.returnClause.type.description == "Int")
         #expect(method.body is IntegerLiteralExpr)
@@ -48,27 +48,27 @@ enum MethodsTestFile: TestFile {
     }
     
     private static func validateSquareMethod(method: FuncDecl) throws {
-        #expect(method.name == "square")
+        #expect(method.name.value == "square")
         try #require(method.parameters.parameters.count == 1)
-        #expect(method.parameters.parameters[0].name == "x")
+        #expect(method.parameters.parameters[0].name.value == "x")
         #expect(method.parameters.parameters[0].type.description == "Int")
         #expect(method.returnClause.type.description == "Int")
         #expect(method.body is OperationExpr)
     }
     
     private static func validateAddMethod(method: FuncDecl) throws {
-        #expect(method.name == "add")
+        #expect(method.name.value == "add")
         try #require(method.parameters.parameters.count == 2)
-        #expect(method.parameters.parameters[0].name == "a")
+        #expect(method.parameters.parameters[0].name.value == "a")
         #expect(method.parameters.parameters[0].type.description == "Int")
-        #expect(method.parameters.parameters[1].name == "b")
+        #expect(method.parameters.parameters[1].name.value == "b")
         #expect(method.parameters.parameters[1].type.description == "Int")
         #expect(method.returnClause.type.description == "Int")
         #expect(method.body is OperationExpr)
     }
     
     private static func validateGetStringMethod(method: FuncDecl) throws {
-        #expect(method.name == "getString")
+        #expect(method.name.value == "getString")
         #expect(method.parameters.parameters.isEmpty)
         #expect(method.returnClause.type.description == "String")
         #expect(method.body is StringLiteralExpr)
@@ -78,7 +78,7 @@ enum MethodsTestFile: TestFile {
     }
     
     private static func validateGetBoolMethod(method: FuncDecl) throws {
-        #expect(method.name == "getBool")
+        #expect(method.name.value == "getBool")
         #expect(method.parameters.parameters.isEmpty)
         #expect(method.returnClause.type.description == "Bool")
         #expect(method.body is BoolLiteralExpr)
@@ -88,7 +88,7 @@ enum MethodsTestFile: TestFile {
     }
     
     private static func validateGetObjectMethod(method: FuncDecl) throws {
-        #expect(method.name == "getObject")
+        #expect(method.name.value == "getObject")
         #expect(method.parameters.parameters.isEmpty)
         #expect(method.returnClause.type.description == "Object")
         #expect(method.body is NewExpr)
@@ -98,9 +98,9 @@ enum MethodsTestFile: TestFile {
     }
     
     private static func validateProcessMethod(method: FuncDecl) throws {
-        #expect(method.name == "process")
+        #expect(method.name.value == "process")
         try #require(method.parameters.parameters.count == 1)
-        #expect(method.parameters.parameters[0].name == "x")
+        #expect(method.parameters.parameters[0].name.value == "x")
         #expect(method.parameters.parameters[0].type.description == "Int")
         #expect(method.returnClause.type.description == "Int")
         #expect(method.body is BlockExpr)

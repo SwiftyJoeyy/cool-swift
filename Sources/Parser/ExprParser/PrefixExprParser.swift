@@ -151,11 +151,11 @@ extension ExprParser {
         }
         
         try parser.advance()
-        var branches = [CaseBranchExpr]()
+        var branches = [CaseBranch]()
         
         do throws(Diagnostic) {
             while !parser.at(.keyword(.esac)) {
-                let binding = try VarDeclParser.parse(from: &parser)
+                let binding = try parseCaseBranchBinding(from: &parser)
                 if try parser.advance().kind != .arrow {
                     throw ParserError.expectedSymbol(.arrow)
                         .diagnostic(at: parser.currentToken.location)
@@ -169,7 +169,7 @@ extension ExprParser {
                 try parser.advance()
                 
                 branches.append(
-                    CaseBranchExpr(
+                    CaseBranch(
                         binding: binding,
                         body: body,
                         location: binding.location
@@ -192,6 +192,40 @@ extension ExprParser {
             expr: expr,
             branches: branches,
             location: caseToken.location
+        )
+    }
+    
+    private static func parseCaseBranchBinding(
+        from parser: inout CoolParser
+    ) throws(Diagnostic) -> CaseBranch.Binding {
+        let location = parser.currentToken.location
+        guard case .identifier(let name) = parser.currentToken.kind else {
+            throw ParserError.expectedVarName.diagnostic(at: location)
+        }
+        
+        let colonLocation: SourceLocation
+        if let colonToken = try parser.advance(if: {$0.kind == .colon}) {
+            colonLocation = colonToken.location
+        } else {
+            colonLocation = parser.currentToken.location
+            parser.diagnose(ParserError.expectedSymbol(.colon).diagnostic(at: colonLocation))
+        }
+        
+        let typeToken = try parser.advance()
+        guard case .identifier(let type) = typeToken.kind else {
+            throw ParserError.expectedTypeAnnotation.diagnostic(at: location)
+        }
+        
+        return CaseBranch.Binding(
+            name: Identifier(value: name, location: location),
+            typeAnnotation: TypeAnnotation(
+                type: TypeIdentifier(
+                    name: type,
+                    location: typeToken.location
+                ),
+                location: colonLocation
+            ),
+            location: location
         )
     }
     

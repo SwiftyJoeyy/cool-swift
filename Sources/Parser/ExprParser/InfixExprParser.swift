@@ -28,7 +28,7 @@ extension ExprParser {
                 )
                 return OperationExpr(
                     lhs: left,
-                    operatorExpr: parseBinaryOpExpr(from: opToken),
+                    op: parseBinaryOpExpr(from: opToken),
                     rhs: right,
                     location: left.location
                 )
@@ -46,11 +46,14 @@ extension ExprParser {
                 )
                 
             case .dot:
-                try parser.advance()
-                let member = try parse(from: &parser, minPrecedence: precedence.higher)
+                let memberToken = try parser.advance()
+                guard case .identifier(let name) = memberToken.kind else {
+                    throw ParserError.expectedMemberName
+                        .diagnostic(at: memberToken.location)
+                }
                 return MemberAccessExpr(
                     base: left,
-                    member: member,
+                    member: DeclRefExpr(name: name, location: memberToken.location),
                     location: left.location
                 )
                 
@@ -80,8 +83,8 @@ extension ExprParser {
         }
     }
     
-    private static func parseBinaryOpExpr(from token: Token) -> BinaryOperatorExpr {
-        let op: BinaryOperatorExpr.Operator
+    private static func parseBinaryOpExpr(from token: Token) -> BinaryOperator {
+        let op: BinaryOperator.Operator
         switch token.kind {
             case .lessThan:
                 op = .lessThan
@@ -100,7 +103,7 @@ extension ExprParser {
             default:
                 fatalError()
         }
-        return BinaryOperatorExpr(op: op, location: token.location)
+        return BinaryOperator(op: op, location: token.location)
     }
     
     private static func parseFuncCallArgs(

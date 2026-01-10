@@ -25,7 +25,7 @@ public enum ParserError {
     
 // MARK: - Expr
     case unexpectedExpression
-    
+    case expectedMemberName
     case expectedType
     case expectedSymbol(SyntaxSymbol)
     case expectedKeyword(Keyword)
@@ -40,6 +40,7 @@ extension ParserError: DiagnosticConvertible {
         return .error
     }
     
+    #warning("Add messages")
     public var message: String {
         return "\(self)"
     }

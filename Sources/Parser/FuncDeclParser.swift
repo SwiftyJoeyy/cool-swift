@@ -48,18 +48,13 @@ internal struct FuncDeclParser {
         try parser.advance()
         let body = try ExprParser.parse(from: &parser)
         
-//        guard try parser.advance().kind == .semicolon else {
-//            throw ParserError.expectedSymbol(.semicolon)
-//                .diagnostic(at: parser.currentToken.location)
-//        }
-        
         guard try parser.advance().kind == .rightBrace else {
             throw ParserError.expectedSymbol(.rightBrace)
                 .diagnostic(at: parser.currentToken.location)
         }
         
         return FuncDecl(
-            name: name,
+            name: Identifier(value: name, location: location),
             parameters: paramsClause,
             returnClause: ReturnClause(
                 type: TypeIdentifier(name: type, location: typeToken.location),
@@ -111,7 +106,7 @@ internal struct FuncDeclParser {
                 
                 params.append(
                     ParameterDecl(
-                        name: name,
+                        name: Identifier(value: name, location: paramLocation),
                         type: TypeIdentifier(name: type, location: typeToken.location),
                         location: paramLocation
                     )

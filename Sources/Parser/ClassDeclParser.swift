@@ -34,7 +34,7 @@ internal struct ClassDeclParser {
         }
         
         return ClassDecl(
-            name: name,
+            name: Identifier(value: name, location: identifierToken.location),
             inheritance: inheritance,
             membersBlock: membersBlock,
             location: location

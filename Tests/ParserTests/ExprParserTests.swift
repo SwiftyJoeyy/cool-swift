@@ -72,7 +72,7 @@ import Lexer
         
         let opExpr = try #require(expr as? OperationExpr)
         #expect(opExpr.lhs is IntegerLiteralExpr)
-        #expect((opExpr.operatorExpr as? BinaryOperatorExpr)?.op == .plus)
+        #expect(opExpr.op.op == .plus)
         #expect(opExpr.rhs is IntegerLiteralExpr)
     }
     
@@ -81,7 +81,7 @@ import Lexer
         
         let opExpr = try #require(expr as? OperationExpr)
         #expect(opExpr.lhs is IntegerLiteralExpr)
-        #expect((opExpr.operatorExpr as? BinaryOperatorExpr)?.op == .minus)
+        #expect(opExpr.op.op == .minus)
         #expect(opExpr.rhs is IntegerLiteralExpr)
     }
     
@@ -90,7 +90,7 @@ import Lexer
         
         let opExpr = try #require(expr as? OperationExpr)
         #expect(opExpr.lhs is IntegerLiteralExpr)
-        #expect((opExpr.operatorExpr as? BinaryOperatorExpr)?.op == .star)
+        #expect(opExpr.op.op == .star)
         #expect(opExpr.rhs is IntegerLiteralExpr)
     }
     
@@ -99,7 +99,7 @@ import Lexer
         
         let opExpr = try #require(expr as? OperationExpr)
         #expect(opExpr.lhs is IntegerLiteralExpr)
-        #expect((opExpr.operatorExpr as? BinaryOperatorExpr)?.op == .slash)
+        #expect(opExpr.op.op == .slash)
         #expect(opExpr.rhs is IntegerLiteralExpr)
     }
     
@@ -110,11 +110,11 @@ import Lexer
             let addExpr = try #require(expr as? OperationExpr)
             
             #expect(addExpr.lhs is IntegerLiteralExpr)
-            #expect((addExpr.operatorExpr as? BinaryOperatorExpr)?.op == .plus)
+            #expect(addExpr.op.op == .plus)
             
             let mulExpr = try #require(addExpr.rhs as? OperationExpr)
             #expect(mulExpr.lhs is IntegerLiteralExpr)
-            #expect((mulExpr.operatorExpr as? BinaryOperatorExpr)?.op == .star)
+            #expect(mulExpr.op.op == .star)
             #expect(mulExpr.rhs is IntegerLiteralExpr)
         }
         
@@ -125,11 +125,11 @@ import Lexer
             
             let mulExpr = try #require(addExpr.lhs as? OperationExpr)
             #expect(mulExpr.lhs is IntegerLiteralExpr)
-            #expect((mulExpr.operatorExpr as? BinaryOperatorExpr)?.op == .star)
+            #expect(mulExpr.op.op == .star)
             #expect(mulExpr.rhs is IntegerLiteralExpr)
             
             #expect(addExpr.rhs is IntegerLiteralExpr)
-            #expect((addExpr.operatorExpr as? BinaryOperatorExpr)?.op == .plus)
+            #expect(addExpr.op.op == .plus)
         }
     }
     
@@ -140,10 +140,10 @@ import Lexer
         
         let addExpr = try #require(mulExpr.lhs as? OperationExpr)
         #expect(addExpr.lhs is IntegerLiteralExpr)
-        #expect((addExpr.operatorExpr as? BinaryOperatorExpr)?.op == .plus)
+        #expect(addExpr.op.op == .plus)
         #expect(addExpr.rhs is IntegerLiteralExpr)
         
-        #expect((mulExpr.operatorExpr as? BinaryOperatorExpr)?.op == .star)
+        #expect(mulExpr.op.op == .star)
         #expect(mulExpr.rhs is IntegerLiteralExpr)
     }
     
@@ -153,7 +153,7 @@ import Lexer
         
         let opExpr = try #require(expr as? OperationExpr)
         #expect(opExpr.lhs is DeclRefExpr)
-        #expect((opExpr.operatorExpr as? BinaryOperatorExpr)?.op == .lessThan)
+        #expect(opExpr.op.op == .lessThan)
         #expect(opExpr.rhs is IntegerLiteralExpr)
     }
     
@@ -162,7 +162,7 @@ import Lexer
         
         let opExpr = try #require(expr as? OperationExpr)
         #expect(opExpr.lhs is DeclRefExpr)
-        #expect((opExpr.operatorExpr as? BinaryOperatorExpr)?.op == .lessThanOrEqual)
+        #expect(opExpr.op.op == .lessThanOrEqual)
         #expect(opExpr.rhs is IntegerLiteralExpr)
     }
     
@@ -171,7 +171,7 @@ import Lexer
         
         let opExpr = try #require(expr as? OperationExpr)
         #expect(opExpr.lhs is DeclRefExpr)
-        #expect((opExpr.operatorExpr as? BinaryOperatorExpr)?.op == .equal)
+        #expect(opExpr.op.op == .equal)
         #expect(opExpr.rhs is IntegerLiteralExpr)
     }
     
@@ -279,7 +279,7 @@ import Lexer
         
         let memberAccExpr = try #require(expr as? MemberAccessExpr)
         #expect(memberAccExpr.base is DeclRefExpr)
-        #expect(memberAccExpr.member is DeclRefExpr)
+        #expect(memberAccExpr.member.name == "x")
     }
     
     @Test func `parses member access with func call`() throws {
@@ -289,7 +289,7 @@ import Lexer
         
         let memberAccExpr = try #require(funcCallExpr.calledExpression as? MemberAccessExpr)
         #expect(memberAccExpr.base is DeclRefExpr)
-        #expect(memberAccExpr.member is DeclRefExpr)
+        #expect(memberAccExpr.member.name == "f")
     }
     
 // MARK: - Static Dispatch Tests
@@ -310,7 +310,7 @@ import Lexer
         #expect(staticDispExpr.base is DeclRefExpr)
         #expect(staticDispExpr.type.description == "Type")
         
-        #expect(memberAccExpr.member is DeclRefExpr)
+        #expect(memberAccExpr.member.name == "x")
     }
     
     @Test func `parses static dispatch with func call`() throws {
@@ -324,7 +324,7 @@ import Lexer
         #expect(staticDispExpr.base is DeclRefExpr)
         #expect(staticDispExpr.type.description == "Type")
         
-        #expect(memberAccExpr.member is DeclRefExpr)
+        #expect(memberAccExpr.member.name == "f")
     }
     
     @Test func `reports error on missing type in static dispatch`() throws {

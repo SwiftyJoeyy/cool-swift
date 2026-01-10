@@ -22,7 +22,7 @@ enum SimpleTestFile: TestFile {
     }
     
     private static func validateMainClass(classDecl: ClassDecl) throws {
-        #expect(classDecl.name == "Main")
+        #expect(classDecl.name.value == "Main")
         #expect(classDecl.inheritance == nil)
         
         let members = classDecl.membersBlock.members
@@ -30,7 +30,7 @@ enum SimpleTestFile: TestFile {
         
         // Validate property 'x : Int <- 42'
         let xProperty = try #require(members[0] as? VarDecl)
-        #expect(xProperty.name == "x")
+        #expect(xProperty.name.value == "x")
         #expect(xProperty.typeAnnotation.type.description == "Int")
         #expect(xProperty.initializer != nil)
         
@@ -39,7 +39,7 @@ enum SimpleTestFile: TestFile {
         
         // Validate method 'main() : Int'
         let mainMethod = try #require(members[1] as? FuncDecl)
-        #expect(mainMethod.name == "main")
+        #expect(mainMethod.name.value == "main")
         #expect(mainMethod.parameters.parameters.isEmpty)
         #expect(mainMethod.returnClause.type.description == "Int")
         

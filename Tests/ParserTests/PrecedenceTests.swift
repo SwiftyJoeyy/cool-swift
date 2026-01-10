@@ -26,11 +26,11 @@ import Lexer
         
         #expect(addExpr.lhs.description == "1")
         
-        #expect((addExpr.operatorExpr as? BinaryOperatorExpr)?.op == .plus)
+        #expect(addExpr.op.op == .plus)
         
         let mulExpr = try #require(addExpr.rhs as? OperationExpr)
         #expect(mulExpr.lhs.description == "2")
-        #expect((mulExpr.operatorExpr as? BinaryOperatorExpr)?.op == .star)
+        #expect(mulExpr.op.op == .star)
         #expect(mulExpr.rhs.description == "3")
     }
     
@@ -40,11 +40,11 @@ import Lexer
         let subExpr = try #require(expr as? OperationExpr)
         #expect(subExpr.lhs.description == "10")
         
-        #expect((subExpr.operatorExpr as? BinaryOperatorExpr)?.op == .minus)
+        #expect(subExpr.op.op == .minus)
         
         let divExpr = try #require(subExpr.rhs as? OperationExpr)
         #expect(divExpr.lhs.description == "6")
-        #expect((divExpr.operatorExpr as? BinaryOperatorExpr)?.op == .slash)
+        #expect(divExpr.op.op == .slash)
         #expect(divExpr.rhs.description == "2")
     }
     
@@ -55,10 +55,10 @@ import Lexer
         
         let lhs = try #require(addExpr.lhs as? OperationExpr)
         #expect(lhs.lhs.description == "1")
-        #expect((lhs.operatorExpr as? BinaryOperatorExpr)?.op == .plus)
+        #expect(lhs.op.op == .plus)
         #expect(lhs.rhs.description == "2")
         
-        #expect((addExpr.operatorExpr as? BinaryOperatorExpr)?.op == .plus)
+        #expect(addExpr.op.op == .plus)
         
         #expect(addExpr.rhs.description == "3")
     }
@@ -70,10 +70,10 @@ import Lexer
         
         let lhs = try #require(mullExpr.lhs as? OperationExpr)
         #expect(lhs.lhs.description == "2")
-        #expect((lhs.operatorExpr as? BinaryOperatorExpr)?.op == .star)
+        #expect(lhs.op.op == .star)
         #expect(lhs.rhs.description == "3")
         
-        #expect((mullExpr.operatorExpr as? BinaryOperatorExpr)?.op == .star)
+        #expect(mullExpr.op.op == .star)
         
         #expect(mullExpr.rhs.description == "4")
     }
@@ -86,14 +86,14 @@ import Lexer
         
         let lhs = try #require(cmpExpr.lhs as? OperationExpr)
         #expect(lhs.lhs.description == "1")
-        #expect((lhs.operatorExpr as? BinaryOperatorExpr)?.op == .plus)
+        #expect(lhs.op.op == .plus)
         #expect(lhs.rhs.description == "2")
         
-        #expect((cmpExpr.operatorExpr as? BinaryOperatorExpr)?.op == .lessThan)
+        #expect(cmpExpr.op.op == .lessThan)
         
         let rhs = try #require(cmpExpr.rhs as? OperationExpr)
         #expect(rhs.lhs.description == "3")
-        #expect((rhs.operatorExpr as? BinaryOperatorExpr)?.op == .plus)
+        #expect(rhs.op.op == .plus)
         #expect(rhs.rhs.description == "4")
     }
     
@@ -113,10 +113,10 @@ import Lexer
         
         let lhs = try #require(mullExpr.lhs as? OperationExpr)
         #expect(lhs.lhs.description == "1")
-        #expect((lhs.operatorExpr as? BinaryOperatorExpr)?.op == .plus)
+        #expect(lhs.op.op == .plus)
         #expect(lhs.rhs.description == "2")
         
-        #expect((mullExpr.operatorExpr as? BinaryOperatorExpr)?.op == .star)
+        #expect(mullExpr.op.op == .star)
         
         #expect(mullExpr.rhs.description == "3")
     }
@@ -127,15 +127,15 @@ import Lexer
         let outerAddExpr = try #require(expr as? OperationExpr)
         
         let mullExpr = try #require(outerAddExpr.lhs as? OperationExpr)
-        #expect((mullExpr.operatorExpr as? BinaryOperatorExpr)?.op == .star)
+        #expect(mullExpr.op.op == .star)
         #expect(mullExpr.rhs.description == "3")
         
         let innerAddExpr = try #require(mullExpr.lhs as? OperationExpr)
         #expect(innerAddExpr.lhs.description == "1")
-        #expect((innerAddExpr.operatorExpr as? BinaryOperatorExpr)?.op == .plus)
+        #expect(innerAddExpr.op.op == .plus)
         #expect(innerAddExpr.rhs.description == "2")
         
-        #expect((outerAddExpr.operatorExpr as? BinaryOperatorExpr)?.op == .plus)
+        #expect(outerAddExpr.op.op == .plus)
         
         #expect(outerAddExpr.rhs.description == "4")
     }
@@ -171,14 +171,14 @@ import Lexer
         
         let addExpr = try #require(cmpExpr.lhs as? OperationExpr)
         #expect(addExpr.lhs.description == "a")
-        #expect((addExpr.operatorExpr as? BinaryOperatorExpr)?.op == .plus)
+        #expect(addExpr.op.op == .plus)
         
         let mullExpr = try #require(addExpr.rhs as? OperationExpr)
         #expect(mullExpr.lhs.description == "b")
-        #expect((mullExpr.operatorExpr as? BinaryOperatorExpr)?.op == .star)
+        #expect(mullExpr.op.op == .star)
         #expect(mullExpr.rhs.description == "c")
         
-        #expect((cmpExpr.operatorExpr as? BinaryOperatorExpr)?.op == .lessThan)
+        #expect(cmpExpr.op.op == .lessThan)
         
         #expect(cmpExpr.rhs.description == "d")
     }
@@ -190,18 +190,18 @@ import Lexer
         
         let lhs = try #require(cmpExpr.lhs as? OperationExpr)
         #expect(lhs.lhs.description == "1")
-        #expect((lhs.operatorExpr as? BinaryOperatorExpr)?.op == .plus)
+        #expect(lhs.op.op == .plus)
         
         let mullExpr = try #require(lhs.rhs as? OperationExpr)
         #expect(mullExpr.lhs.description == "2")
-        #expect((mullExpr.operatorExpr as? BinaryOperatorExpr)?.op == .star)
+        #expect(mullExpr.op.op == .star)
         #expect(mullExpr.rhs.description == "3")
         
-        #expect((cmpExpr.operatorExpr as? BinaryOperatorExpr)?.op == .lessThan)
+        #expect(cmpExpr.op.op == .lessThan)
         
         let rhs = try #require(cmpExpr.rhs as? OperationExpr)
         #expect(rhs.lhs.description == "4")
-        #expect((rhs.operatorExpr as? BinaryOperatorExpr)?.op == .plus)
+        #expect(rhs.op.op == .plus)
         #expect(rhs.rhs.description == "5")
     }
 }

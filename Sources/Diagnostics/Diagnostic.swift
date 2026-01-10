@@ -8,7 +8,7 @@
 import Foundation
 import Basic
 
-public struct Diagnostic: Error, Equatable, Hashable, Sendable {
+public struct Diagnostic: Error, Equatable, Hashable {
     public let id: String
     public let severity: DiagnosticSeverity
     public let message: String
