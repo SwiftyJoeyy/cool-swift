@@ -1,0 +1,43 @@
+{
+  "configurations" : [
+    {
+      "id" : "C019185E-4E12-4592-AA62-95E396AB1C45",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:",
+      "identifier" : "CoolSwift",
+      "name" : "CoolSwift"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "LexerTests",
+        "name" : "LexerTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "SemaTests",
+        "name" : "SemaTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "ParserTests",
+        "name" : "ParserTests"
+      }
+    }
+  ],
+  "version" : 1
+}

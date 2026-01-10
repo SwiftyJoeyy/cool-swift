@@ -12,7 +12,8 @@ let package = Package(
         Basic.product,
         Diagnostics.product,
         Lexer.product,
-        Parser.product
+        Parser.product,
+        Sema.product
     ],
     dependencies: [
         ArgumentParser.package
@@ -27,6 +28,9 @@ let package = Package(
         
         Parser.target,
         Parser.tests,
+        
+        Sema.target,
+        Sema.tests,
         
         .executableTarget(
             name: "CoolSwift",
@@ -125,6 +129,32 @@ enum Parser {
                 Parser.dependency
             ],
             resources: [.copy("IntegrationTests/Resources")]
+        )
+    }
+}
+
+enum Sema {
+    static let dependency: Target.Dependency = "Sema"
+    static var product: Product {
+        .library(name: "Sema", targets: ["Sema"])
+    }
+    static var target: Target {
+        .target(
+            name: "Sema",
+            dependencies: [
+                AST.dependency,
+                Basic.dependency,
+                Diagnostics.dependency,
+                Parser.dependency
+            ]
+        )
+    }
+    static var tests: Target {
+        .testTarget(
+            name: "SemaTests",
+            dependencies: [
+                Sema.dependency
+            ]
         )
     }
 }

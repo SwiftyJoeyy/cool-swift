@@ -37,7 +37,7 @@ internal struct IntegerLiteralLexer: TokenLexer {
     }
     
     private static func validSeparator(_ char: UInt8) -> Bool {
-        if char == .space || char == .newline || char == .tab {
+        if char.validSeparator {
             return true
         }
         if OperatorLexer.matches(char) {

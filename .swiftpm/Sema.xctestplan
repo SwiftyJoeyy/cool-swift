@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "193DC961-7BEB-40CF-821A-86BAF8DB44A9",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "SemaTests",
+        "name" : "SemaTests"
+      }
+    }
+  ],
+  "version" : 1
+}

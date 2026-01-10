@@ -8,6 +8,12 @@
 import Foundation
 
 extension UInt8 {
+    /// Valid separators
+    internal static let separators: Set<UInt8> = [.space, .newline, .tab, .carriageReturn]
+    
+    /// 13
+    internal static let carriageReturn = UInt8(ascii: "\r")
+    
     /// 10
     internal static let newline = UInt8(ascii: "\n")
     
@@ -31,6 +37,10 @@ extension UInt8 {
     
     internal var unicode: String {
         return String(UnicodeScalar(self))
+    }
+    
+    internal var validSeparator: Bool {
+        return Self.separators.contains(self)
     }
 }
 

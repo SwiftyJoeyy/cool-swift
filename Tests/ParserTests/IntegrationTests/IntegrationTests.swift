@@ -31,7 +31,10 @@ protocol TestFile {
         )
         let source = try String(contentsOf: url)
         
-        var (parser, diagEngine) = try CoolParser.new(source: source)
+        var (parser, diagEngine) = try CoolParser.new(
+            source: source,
+            file: "\(name).cl"
+        )
         return (try parser.parse(), diagEngine.diags)
     }
     
