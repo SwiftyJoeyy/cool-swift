@@ -67,19 +67,36 @@ import Parser
     }
     
     @Test func `validates if with common ancestor types`() throws {
-        let source = """
-        class Animal { };
-        class Dog inherits Animal { };
-        class Cat inherits Animal { };
-        
-        class Main {
-            foo() : Animal {
-                if true then new Dog else new Cat fi
+        do {
+            let source = """
+            class Animal { };
+            class Dog inherits Animal { };
+            class Cat inherits Animal { };
+            
+            class Main {
+                foo() : Animal {
+                    if true then new Dog else new Cat fi
+                };
             };
-        };
-        """
+            """
+            
+            try analyze(source)
+        }
         
-        try analyze(source)
+        do {
+            let source = """
+            class Animal { };
+            class Cat inherits Animal { };
+            
+            class Main {
+                foo() : Animal {
+                    if true then new Animal else new Cat fi
+                };
+            };
+            """
+            
+            try analyze(source)
+        }
     }
     
 // MARK: - While Expression Tests

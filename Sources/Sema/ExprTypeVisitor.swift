@@ -275,6 +275,18 @@ struct ExprTypeVisitor: ExprVisitor {
         _ = try context.typeSystem.typeCheck(expr.expression, with: context)
         type = .bool
     }
+    
+    mutating func visit(_ expr: ComplementExpr) throws(Diagnostic) {
+        let exprType = try context.typeSystem.typeCheck(
+            expr.expression,
+            with: context
+        )
+        guard exprType == .int else {
+            throw SemaError.unaryOperatorInvalidType(op: "~", expected: "Int")
+                .diagnostic(at: expr.expression.location)
+        }
+        type = .int
+    }
 }
 
 extension BinaryOperator.Operator {

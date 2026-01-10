@@ -54,6 +54,13 @@ extension ExprParser {
                     location: token.location
                 )
                 
+            case .tilde:
+                try parser.advance()
+                return ComplementExpr(
+                    expression: try parse(from: &parser, minPrecedence: .unary),
+                    location: token.location
+                )
+                
             case .integerLiteral(let value):
                 return IntegerLiteralExpr(value: value, location: token.location)
             case .stringLiteral(let value):

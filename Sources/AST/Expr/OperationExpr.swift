@@ -145,3 +145,21 @@ public struct IsVoidExpr: Expr {
         try visitor.visit(self)
     }
 }
+
+public struct ComplementExpr: Expr {
+    public let expression: any Expr
+    public let location: SourceLocation
+    
+    public var description: String {
+        return "~\(expression.description)"
+    }
+    
+    public init(expression: some Expr, location: SourceLocation) {
+        self.expression = expression
+        self.location = location
+    }
+    
+    public func accept<V: ExprVisitor>(_ visitor: inout V) throws(V.Diag) {
+        try visitor.visit(self)
+    }
+}

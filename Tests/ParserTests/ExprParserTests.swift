@@ -214,6 +214,27 @@ import Lexer
         #expect(isVoidExpr.expression is OperationExpr)
     }
     
+    @Test func `parses complement expression`() throws {
+        let expr = try parse("~5")
+        
+        let complementExpr = try #require(expr as? ComplementExpr)
+        #expect(complementExpr.expression is IntegerLiteralExpr)
+    }
+    
+    @Test func `parses complement with identifier`() throws {
+        let expr = try parse("~x")
+        
+        let complementExpr = try #require(expr as? ComplementExpr)
+        #expect(complementExpr.expression is DeclRefExpr)
+    }
+    
+    @Test func `parses complement with parenthesized expression`() throws {
+        let expr = try parse("~(1 + 2)")
+        
+        let complementExpr = try #require(expr as? ComplementExpr)
+        #expect(complementExpr.expression is OperationExpr)
+    }
+    
     @Test func `parses new expression`() throws {
         let expr = try parse("new Point")
         

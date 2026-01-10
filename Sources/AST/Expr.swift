@@ -27,6 +27,7 @@ public protocol ExprVisitor {
     mutating func visit(_ expr: NewExpr) throws(Diag)
     mutating func visit(_ expr: NotExpr) throws(Diag)
     mutating func visit(_ expr: IsVoidExpr) throws(Diag)
+    mutating func visit(_ expr: ComplementExpr) throws(Diag)
 }
 
 public protocol Expr: ASTNode {

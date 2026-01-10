@@ -63,6 +63,7 @@ fileprivate struct ExprMemberDeclVisitor: ExprVisitor {
     mutating func visit(_ expr: NewExpr) throws(Diag) { }
     mutating func visit(_ expr: NotExpr) throws(Diag) { }
     mutating func visit(_ expr: IsVoidExpr) throws(Diag) { }
+    mutating func visit(_ expr: ComplementExpr) throws(Diagnostic) { }
 }
 
 extension Expr {

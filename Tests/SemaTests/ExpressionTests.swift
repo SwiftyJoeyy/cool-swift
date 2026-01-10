@@ -370,7 +370,118 @@ import Parser
             };
         };
         """
-
+        
+        try analyze(source)
+    }
+    
+// MARK: - Complement Tests
+    @Test func `validates complement expression with int`() throws {
+        let source = """
+        class Main {
+            foo() : Int {
+                ~5
+            };
+        };
+        """
+        
+        try analyze(source)
+    }
+    
+    @Test func `detects complement on non int`() throws {
+        do {
+            let source = """
+            class Main {
+                foo() : Int {
+                    ~true
+                };
+            };
+            """
+            
+            let error = #expect(throws: Diagnostic.self) {
+                try analyze(source)
+            }
+            #expect(error?.message == "'~' can only be applied to an operand of type 'Int'")
+        }
+        
+        do {
+            let source = """
+            class Main {
+                foo() : Int {
+                    ~"hello"
+                };
+            };
+            """
+            
+            let error = #expect(throws: Diagnostic.self) {
+                try analyze(source)
+            }
+            #expect(error?.message == "'~' can only be applied to an operand of type 'Int'")
+        }
+    }
+    
+    @Test func `validates complement returns int`() throws {
+        let source = """
+        class Main {
+            x : Int;
+            foo() : Int {
+                x <- ~42
+            };
+        };
+        """
+        
+        try analyze(source)
+    }
+    
+    @Test func `validates operations on complement result`() throws {
+        let source = """
+        class Main {
+            x : Int;
+            foo() : Int {
+                ~x + 1
+            };
+        };
+        """
+        
+        try analyze(source)
+    }
+    
+    @Test func `validates complement on operation`() throws {
+        let source = """
+        class Main {
+            x : Int;
+            foo() : Int {
+                ~(x + 1)
+            };
+        };
+        """
+        
+        try analyze(source)
+    }
+    
+    @Test func `validates nested complement`() throws {
+        let source = """
+        class Main {
+            x : Int;
+            foo() : Int {
+                ~~x
+            };
+        };
+        """
+        
+        try analyze(source)
+    }
+    
+    @Test func `validates complex expression with complement and operations`() throws {
+        let source = """
+        class Main {
+            x : Int;
+            y : Int;
+            foo() : Int {
+                (~x + y) * ~(x - y)
+            };
+        };
+        """
+        
         try analyze(source)
     }
     
