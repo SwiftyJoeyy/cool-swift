@@ -18,8 +18,14 @@ public protocol DiagnosticConvertible {
 
 extension DiagnosticConvertible {
     @discardableResult public func diagnostic(
-        at location: SourceLocation? = nil
+        at location: SourceLocation? = nil,
+        _ file: String = #file,
+        _ line: Int = #line,
+        _ caller: String = #function,
     ) -> Diagnostic {
         return Diagnostic(self, location: location)
+#if DEBUG
+            .debugInfo("\(file) - line \(line) - \(caller)")
+#endif
     }
 }
