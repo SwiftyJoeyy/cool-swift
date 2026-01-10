@@ -27,4 +27,8 @@ public struct FuncCallExpr: Expr {
         self.arguments = arguments
         self.location = location
     }
+    
+    public func accept<V: ExprVisitor>(_ visitor: inout V) throws(V.Diag) {
+        try visitor.visit(self)
+    }
 }

@@ -35,6 +35,10 @@ public struct IfExpr: Expr {
         self.elseBody = elseBody
         self.location = location
     }
+    
+    public func accept<V: ExprVisitor>(_ visitor: inout V) throws(V.Diag) {
+        try visitor.visit(self)
+    }
 }
 
 public struct WhileExpr: Expr {
@@ -59,11 +63,15 @@ public struct WhileExpr: Expr {
         self.body = body
         self.location = location
     }
+    
+    public func accept<V: ExprVisitor>(_ visitor: inout V) throws(V.Diag) {
+        try visitor.visit(self)
+    }
 }
 
 public struct CaseExpr: Expr {
     public let expr: any Expr
-    public let branches: [CaseBranchExpr]
+    public let branches: [CaseBranch]
     public let location: SourceLocation
     
     public var description: String {
@@ -78,17 +86,21 @@ public struct CaseExpr: Expr {
     
     public init(
         expr: some Expr,
-        branches: [CaseBranchExpr],
+        branches: [CaseBranch],
         location: SourceLocation
     ) {
         self.expr = expr
         self.branches = branches
         self.location = location
     }
+    
+    public func accept<V: ExprVisitor>(_ visitor: inout V) throws(V.Diag) {
+        try visitor.visit(self)
+    }
 }
 
-public struct CaseBranchExpr: Expr {
-    public let binding: VarDecl
+public struct CaseBranch: ASTNode {
+    public let binding: Binding
     public let body: any Expr
     public let location: SourceLocation
     
@@ -96,10 +108,33 @@ public struct CaseBranchExpr: Expr {
         return "\(binding.description) => \(body.description)"
     }
     
-    public init(binding: VarDecl, body: some Expr, location: SourceLocation) {
+    public init(binding: Binding, body: some Expr, location: SourceLocation) {
         self.binding = binding
         self.body = body
         self.location = location
+    }
+    
+    public struct Binding: BindingDecl {
+        public let name: Identifier
+        public let typeAnnotation: TypeAnnotation
+        public let location: SourceLocation
+        
+        public var type: any TypeRef {
+            return typeAnnotation.type
+        }
+        public var description: String {
+            return "\(name): \(typeAnnotation.description)"
+        }
+        
+        public init(
+            name: Identifier,
+            typeAnnotation: TypeAnnotation,
+            location: SourceLocation
+        ) {
+            self.name = name
+            self.typeAnnotation = typeAnnotation
+            self.location = location
+        }
     }
 }
 
@@ -121,6 +156,10 @@ public struct BlockExpr: Expr {
     public init(expressions: [any Expr], location: SourceLocation) {
         self.expressions = expressions
         self.location = location
+    }
+    
+    public func accept<V: ExprVisitor>(_ visitor: inout V) throws(V.Diag) {
+        try visitor.visit(self)
     }
 }
 
@@ -147,5 +186,9 @@ public struct LetExpr: Expr {
         self.bindings = bindings
         self.body = body
         self.location = location
+    }
+    
+    public func accept<V: ExprVisitor>(_ visitor: inout V) throws(V.Diag) {
+        try visitor.visit(self)
     }
 }

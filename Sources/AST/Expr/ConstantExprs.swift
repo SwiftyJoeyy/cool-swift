@@ -20,6 +20,10 @@ public struct StringLiteralExpr: Expr {
         self.value = value
         self.location = location
     }
+    
+    public func accept<V: ExprVisitor>(_ visitor: inout V) throws(V.Diag) {
+        try visitor.visit(self)
+    }
 }
 
 public struct IntegerLiteralExpr: Expr {
@@ -33,6 +37,10 @@ public struct IntegerLiteralExpr: Expr {
     public init(value: String, location: SourceLocation) {
         self.value = value
         self.location = location
+    }
+    
+    public func accept<V: ExprVisitor>(_ visitor: inout V) throws(V.Diag) {
+        try visitor.visit(self)
     }
 }
 
@@ -48,6 +56,10 @@ public struct BoolLiteralExpr: Expr {
         self.value = value
         self.location = location
     }
+    
+    public func accept<V: ExprVisitor>(_ visitor: inout V) throws(V.Diag) {
+        try visitor.visit(self)
+    }
 }
 
 public struct DeclRefExpr: Expr {
@@ -61,5 +73,9 @@ public struct DeclRefExpr: Expr {
     public init(name: String, location: SourceLocation) {
         self.name = name
         self.location = location
+    }
+    
+    public func accept<V: ExprVisitor>(_ visitor: inout V) throws(V.Diag) {
+        try visitor.visit(self)
     }
 }

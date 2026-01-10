@@ -8,18 +8,21 @@
 import Foundation
 import Basic
 
-public struct VarDecl: Decl {
-    public let name: String
+public struct VarDecl: BindingDecl {
+    public let name: Identifier
     public let typeAnnotation: TypeAnnotation
     public let initializer: InitializerClause?
     public let location: SourceLocation
     
+    public var type: any TypeRef {
+        return typeAnnotation.type
+    }
     public var description: String {
         return "\(name): \(typeAnnotation.description) \(initializer?.description ?? "")"
     }
     
     public init(
-        name: String,
+        name: Identifier,
         typeAnnotation: TypeAnnotation,
         initializer: InitializerClause?,
         location: SourceLocation

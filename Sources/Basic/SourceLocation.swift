@@ -8,6 +8,8 @@
 import Foundation
 
 public struct SourceLocation: Equatable, Hashable, Sendable {
+    public static let empty = SourceLocation(line: 0, column: 0, file: "")
+    
     public let line: Int
     public let column: Int
     public let file: String

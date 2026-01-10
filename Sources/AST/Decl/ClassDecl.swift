@@ -9,7 +9,7 @@ import Foundation
 import Basic
 
 public struct ClassDecl: Decl {
-    public let name: String
+    public let name: Identifier
     public let inheritance: InheritanceClause?
     public let membersBlock: MembersBlock
     public let location: SourceLocation
@@ -23,7 +23,7 @@ public struct ClassDecl: Decl {
     }
     
     public init(
-        name: String,
+        name: Identifier,
         inheritance: InheritanceClause?,
         membersBlock: MembersBlock,
         location: SourceLocation

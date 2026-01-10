@@ -9,7 +9,7 @@ import Foundation
 import Basic
 
 public protocol TypeRef: ASTNode {
-    
+    var name: String { get }
 }
 
 public struct TypeIdentifier: TypeRef {

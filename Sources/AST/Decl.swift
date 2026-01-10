@@ -9,5 +9,9 @@ import Foundation
 import Basic
 
 public protocol Decl: ASTNode {
-    var name: String { get }
+    var name: Identifier { get }
+}
+
+public protocol BindingDecl: Decl {
+    var type: any TypeRef { get }
 }

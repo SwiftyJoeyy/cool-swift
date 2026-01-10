@@ -9,7 +9,7 @@ import Foundation
 import Basic
 
 public struct FuncDecl: Decl {
-    public let name: String
+    public let name: Identifier
     public let parameters: ParametersClause
     public let returnClause: ReturnClause
     public let body: any Expr
@@ -24,7 +24,7 @@ public struct FuncDecl: Decl {
     }
     
     public init(
-        name: String,
+        name: Identifier,
         parameters: ParametersClause,
         returnClause: ReturnClause,
         body: some Expr,
@@ -53,8 +53,8 @@ public struct ParametersClause: ASTNode {
     }
 }
 
-public struct ParameterDecl: Decl {
-    public let name: String
+public struct ParameterDecl: BindingDecl {
+    public let name: Identifier
     public let type: any TypeRef
     public let location: SourceLocation
     
@@ -62,7 +62,7 @@ public struct ParameterDecl: Decl {
         return "\(name): \(type.description)"
     }
     
-    public init(name: String, type: some TypeRef, location: SourceLocation) {
+    public init(name: Identifier, type: some TypeRef, location: SourceLocation) {
         self.name = name
         self.type = type
         self.location = location

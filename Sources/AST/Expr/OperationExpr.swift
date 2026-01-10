@@ -8,9 +8,7 @@
 import Foundation
 import Basic
 
-public protocol OperatorExpr: ASTNode { }
-
-public struct BinaryOperatorExpr: OperatorExpr {
+public struct BinaryOperator: ASTNode {
     public let op: Operator
     public let location: SourceLocation
     
@@ -49,24 +47,28 @@ public struct BinaryOperatorExpr: OperatorExpr {
 
 public struct OperationExpr: Expr {
     public let lhs: any Expr
-    public let operatorExpr: any OperatorExpr
+    public let op: BinaryOperator
     public let rhs: any Expr
     public let location: SourceLocation
     
     public var description: String {
-        return "\(lhs.description) \(operatorExpr.description) \(rhs.description)"
+        return "\(lhs.description) \(op.description) \(rhs.description)"
     }
     
     public init(
         lhs: some Expr,
-        operatorExpr: some OperatorExpr,
+        op: BinaryOperator,
         rhs: some Expr,
         location: SourceLocation
     ) {
         self.lhs = lhs
-        self.operatorExpr = operatorExpr
+        self.op = op
         self.rhs = rhs
         self.location = location
+    }
+    
+    public func accept<V: ExprVisitor>(_ visitor: inout V) throws(V.Diag) {
+        try visitor.visit(self)
     }
 }
 
@@ -84,6 +86,10 @@ public struct AssignmentExpr: Expr {
         self.location = location
         self.value = value
     }
+    
+    public func accept<V: ExprVisitor>(_ visitor: inout V) throws(V.Diag) {
+        try visitor.visit(self)
+    }
 }
 
 public struct NewExpr: Expr {
@@ -97,6 +103,10 @@ public struct NewExpr: Expr {
     public init(type: some TypeRef, location: SourceLocation) {
         self.type = type
         self.location = location
+    }
+    
+    public func accept<V: ExprVisitor>(_ visitor: inout V) throws(V.Diag) {
+        try visitor.visit(self)
     }
 }
 
@@ -112,6 +122,10 @@ public struct NotExpr: Expr {
         self.expression = expression
         self.location = location
     }
+    
+    public func accept<V: ExprVisitor>(_ visitor: inout V) throws(V.Diag) {
+        try visitor.visit(self)
+    }
 }
 
 public struct IsVoidExpr: Expr {
@@ -125,5 +139,9 @@ public struct IsVoidExpr: Expr {
     public init(expression: some Expr, location: SourceLocation) {
         self.expression = expression
         self.location = location
+    }
+    
+    public func accept<V: ExprVisitor>(_ visitor: inout V) throws(V.Diag) {
+        try visitor.visit(self)
     }
 }
