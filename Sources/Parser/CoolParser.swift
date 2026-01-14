@@ -17,13 +17,35 @@ public struct CoolParser {
     internal private(set) var currentToken: Token
     private var lexemes: Lexemes
     
-    public init(lexemes: Lexemes, diagnostics: some DiagnosticsEngine) throws(Diagnostic) {
+    public init(
+        lexemes: Lexemes,
+        diagnostics: some DiagnosticsEngine
+    ) throws(Diagnostic) {
         self.lexemes = lexemes
         self.currentToken = try self.lexemes.consume()
         self.diagnostics = diagnostics
     }
     
     public mutating func parse() throws(Diagnostic) -> SourceFile {
+        let decls = try parseFile(memberParser: DefaultMemberDeclParser())
+        return SourceFile(
+            declarations: decls,
+            location: SourceLocation(line: 1, column: 1, file: lexemes.file)
+        )
+    }
+    
+    public mutating func parseInterface() throws(Diagnostic) -> InterfaceFile {
+        let decls = try parseFile(memberParser: InterfaceMemberDeclParser())
+        return InterfaceFile(
+            declarations: decls,
+            location: SourceLocation(line: 1, column: 1, file: lexemes.file)
+        )
+    }
+    
+    private mutating func parseFile(
+        memberParser: some MemberDeclParser
+    ) throws(Diagnostic) -> [ClassDecl] {
+        let classParser = ClassDeclParser(memberParser: memberParser)
         var declarations = [ClassDecl]()
         
         while !lexemes.reachedEnd {
@@ -32,7 +54,7 @@ public struct CoolParser {
                     throw ParserError.unexpectedTopLevelDeclaration
                         .diagnostic(at: currentToken.location)
                 }
-                declarations.append(try ClassDeclParser.parse(from: &self))
+                declarations.append(try classParser.parse(from: &self))
                 try advance()
             } catch {
                 diagnostics.insert(error)
@@ -40,10 +62,7 @@ public struct CoolParser {
             }
         }
         
-        return SourceFile(
-            declarations: declarations,
-            location: SourceLocation(line: 1, column: 1, file: lexemes.file)
-        )
+        return declarations
     }
 }
 

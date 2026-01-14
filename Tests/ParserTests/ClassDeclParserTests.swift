@@ -17,13 +17,15 @@ import Lexer
 // MARK: - Functions
     private func parse(_ source: String) throws -> ClassDecl {
         var parser = try CoolParser.new(source: source).parser
-        return try ClassDeclParser.parse(from: &parser)
+        return try ClassDeclParser(memberParser: DefaultMemberDeclParser())
+            .parse(from: &parser)
     }
     private func parseWithDiags(
         _ source: String
     ) throws -> (decl: ClassDecl, diags: [Diagnostic]) {
         var (parser, diagEngine) = try CoolParser.new(source: source)
-        let classDecl = try ClassDeclParser.parse(from: &parser)
+        let classDecl = try ClassDeclParser(memberParser: DefaultMemberDeclParser())
+            .parse(from: &parser)
         return (classDecl, diagEngine.diags)
     }
     

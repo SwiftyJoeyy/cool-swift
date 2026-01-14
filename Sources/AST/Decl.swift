@@ -18,6 +18,11 @@ public protocol BindingDecl: Decl {
     var type: any TypeRef { get }
 }
 
+public protocol MethodDecl: Decl {
+    var parameters: ParametersClause { get }
+    var returnClause: ReturnClause { get }
+}
+
 public enum DeclKind {
     case classDecl(ClassDecl)
     case varDecl(VarDecl)
@@ -25,6 +30,8 @@ public enum DeclKind {
     case paramDecl(ParameterDecl)
     case branchBinding(CaseBranch.Binding)
     case selfDecl(SelfDecl)
+    case interfaceVarDecl(InterfaceVarDecl)
+    case interfaceFuncDecl(InterfaceFuncDecl)
 }
 
 extension ClassDecl {
@@ -60,5 +67,17 @@ extension CaseBranch.Binding {
 extension SelfDecl {
     public var kind: DeclKind {
         return .selfDecl(self)
+    }
+}
+
+extension InterfaceFuncDecl {
+    public var kind: DeclKind {
+        return .interfaceFuncDecl(self)
+    }
+}
+
+extension InterfaceVarDecl {
+    public var kind: DeclKind {
+        return .interfaceVarDecl(self)
     }
 }

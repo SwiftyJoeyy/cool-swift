@@ -8,7 +8,7 @@
 import Foundation
 import Basic
 
-public struct FuncDecl: Decl {
+public struct FuncDecl: MethodDecl {
     public let name: Identifier
     public let parameters: ParametersClause
     public let returnClause: ReturnClause

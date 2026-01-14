@@ -20,7 +20,7 @@ internal struct FuncDeclParser {
             throw ParserError.expectedFuncName.diagnostic(at: location)
         }
         
-        let paramsClause = try parseParams(from: &parser)
+        let paramsClause = try ParamsParser.parse(from: &parser)
         
         var colonLocation = parser.currentToken.location
         if let colonToken = try parser.advance(if: {$0.kind == .colon}) {
@@ -64,8 +64,10 @@ internal struct FuncDeclParser {
             location: location
         )
     }
-    
-    internal static func parseParams(
+}
+
+internal struct ParamsParser {
+    internal static func parse(
         from parser: inout CoolParser
     ) throws(Diagnostic) -> ParametersClause {
         var parenLocation = parser.currentToken.location

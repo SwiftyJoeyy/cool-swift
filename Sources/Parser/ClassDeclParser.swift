@@ -11,8 +11,10 @@ import Basic
 import Diagnostics
 import Lexer
 
-internal struct ClassDeclParser {
-    internal static func parse(
+internal struct ClassDeclParser<P: MemberDeclParser> {
+    internal let memberParser: P
+    
+    internal func parse(
         from parser: inout CoolParser
     ) throws(Diagnostic) -> ClassDecl {
         let location = parser.currentToken.location
@@ -41,7 +43,7 @@ internal struct ClassDeclParser {
         )
     }
     
-    internal static func parseInheritanceClause(
+    internal func parseInheritanceClause(
         from parser: inout CoolParser
     ) throws(Diagnostic) -> InheritanceClause {
         let inheritsToken = parser.currentToken
@@ -60,7 +62,7 @@ internal struct ClassDeclParser {
         )
     }
     
-    internal static func parseMembersBlock(
+    internal func parseMembersBlock(
         from parser: inout CoolParser,
         classLocation: SourceLocation
     ) throws(Diagnostic) -> MembersBlock {
@@ -84,19 +86,11 @@ internal struct ClassDeclParser {
                         .diagnostic(at: parser.currentToken.location)
                 }
                 
-                let nextToken = try parser.advanced()
-                if nextToken.kind == .colon {
-                    try members.append(VarDeclParser.parse(from: &parser))
-                } else if nextToken.kind == .leftParen {
-                    try members.append(FuncDeclParser.parse(from: &parser))
-                } else {
-                    throw ParserError.unexpectedDeclaration
-                        .diagnostic(at: nextToken.location)
-                }
+                members.append(try memberParser.parse(from: &parser))
                 
                 if try parser.advance(if: {$0.kind == .semicolon}) == nil {
                     throw ParserError.expectedSymbol(.semicolon)
-                        .diagnostic(at: nextToken.location)
+                        .diagnostic(at: parser.currentToken.location)
                 }
             } catch {
                 parser.diagnose(error)
