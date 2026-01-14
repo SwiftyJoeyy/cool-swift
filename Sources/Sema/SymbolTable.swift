@@ -9,10 +9,15 @@ import Foundation
 import AST
 
 class SymbolTable {
+    private let interfaceSymbols: ModuleInterfaceSymbols
     private var symbolsMap = [CanonicalType: ClassSymbol]()
     
     var symbols: [ClassSymbol] {
         return Array(symbolsMap.values)
+    }
+    
+    init(interfaceSymbols: ModuleInterfaceSymbols) {
+        self.interfaceSymbols = interfaceSymbols
     }
     
     func insert(_ symbol: ClassSymbol) {
@@ -21,7 +26,7 @@ class SymbolTable {
     }
     
     func lookup(_ type: CanonicalType) -> ClassSymbol? {
-        return symbolsMap[type]
+        return symbolsMap[type] ?? interfaceSymbols.lookup(type)
     }
 }
 
@@ -35,6 +40,9 @@ class ClassSymbol {
     }
     var members: [any Decl] {
         return Array(decls.values)
+    }
+    var explicitSuperclass: ClassSymbol? {
+        return superclass?.canonicalType == .object ? nil: superclass
     }
     
     init(decl: ClassDecl) {

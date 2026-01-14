@@ -8,11 +8,15 @@
 import Foundation
 import AST
 
-internal struct CanonicalIdentifier: Canonical {
+internal struct CanonicalIdentifier: Canonical, CustomStringConvertible {
     internal static let `self` = CanonicalIdentifier(name: "self")
     
     internal let name: String
     internal var id: String {
+        return name
+    }
+    
+    internal var description: String {
         return name
     }
 }

@@ -19,7 +19,7 @@ import Parser
     private func analyze(_ source: String) throws {
         var (parser, diagEngine) = try CoolParser.new(source: source)
         let sourceFile = try parser.parse()
-        let sema = Sema(diagnostics: diagEngine)
+        let sema = Sema(diagnostics: diagEngine, interfaceSymbols: .test)
         try sema.analyze(sourceFile)
     }
     

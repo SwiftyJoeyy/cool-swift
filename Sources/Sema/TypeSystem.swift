@@ -43,22 +43,20 @@ struct TypeSystem {
         if type1 == type2 {
             return type1
         }
-        var symbol1 = symbols.lookup(type1)
-        var symbol2 = symbols.lookup(type2)
+        var symbol1 = symbols.lookup(type1)?.explicitSuperclass
+        var symbol2 = symbols.lookup(type2)?.explicitSuperclass
+        var types: Set<CanonicalType> = [type1, type2]
         
-        while let symbol1V = symbol1, let symbol2V = symbol2 {
-            let canType1 = symbol1V.canonicalType
-            let canType2 = symbol2V.canonicalType
+        while symbol1 != nil || symbol2 != nil {
             
-            if canType1 == canType2 {
+            if let canType1 = symbol1?.canonicalType, !types.insert(canType1).inserted {
                 return canType1
-            } else if canType1 == symbol2V.superclass?.canonicalType {
-                return canType1
-            } else if canType2 == symbol1V.superclass?.canonicalType {
+            }
+            if let canType2 = symbol2?.canonicalType, !types.insert(canType2).inserted {
                 return canType2
             }
-            symbol1 = symbol1?.superclass
-            symbol2 = symbol2?.superclass
+            symbol1 = symbol1?.explicitSuperclass
+            symbol2 = symbol2?.explicitSuperclass
         }
         return .object
     }

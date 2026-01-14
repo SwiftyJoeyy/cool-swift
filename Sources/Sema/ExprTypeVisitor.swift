@@ -42,7 +42,7 @@ struct ExprTypeVisitor: ExprVisitor {
     mutating func visit(_ expr: FuncCallExpr) throws(Diag) {
         let member = try expr.calledExpression.member(context)
         
-        guard let funcDecl = member.decl as? FuncDecl else {
+        guard let funcDecl = member.decl as? MethodDecl else {
             let type = try context.typeSystem.typeCheck(
                 expr.calledExpression,
                 with: context

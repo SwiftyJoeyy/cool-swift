@@ -8,9 +8,13 @@
 import Foundation
 import AST
 
-internal struct CanonicalType: Canonical {
+internal struct CanonicalType: Canonical, CustomStringConvertible {
     internal let type: String
     internal var id: String {
+        return type
+    }
+    
+    internal var description: String {
         return type
     }
 }

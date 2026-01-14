@@ -1,0 +1,22 @@
+class Object {
+    abort() : Object;
+    type_name() : String;
+    copy() : SELF_TYPE;
+};
+
+class IO inherits Object {
+    out_string(x : String) : SELF_TYPE;
+    out_int(x : Int) : SELF_TYPE;
+    in_string() : String;
+    in_int() : Int;
+};
+
+class Int inherits Object { };
+
+class String inherits Object {
+    length() : Int;
+    concat(s : String) : String;
+    substr(i : Int, l : Int) : String;
+};
+
+class Bool inherits Object { };

@@ -154,7 +154,8 @@ enum Sema {
             name: "SemaTests",
             dependencies: [
                 Sema.dependency
-            ]
+            ],
+            resources: [.copy("Resources")]
         )
     }
 }

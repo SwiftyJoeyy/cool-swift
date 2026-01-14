@@ -11,12 +11,14 @@ import Diagnostics
 
 struct SymbolTableBuilder {
     private let symbols: SymbolTable
+    private let objectSymbol: ClassSymbol?
     
-    init(symbols: SymbolTable) {
-        self.symbols = symbols
+    init(interfaceSymbols: ModuleInterfaceSymbols) {
+        self.symbols = SymbolTable(interfaceSymbols: interfaceSymbols)
+        self.objectSymbol = symbols.lookup(.object)
     }
     
-    func build(from decls: [ClassDecl]) throws(Diagnostic) {
+    func build(from decls: [ClassDecl]) throws(Diagnostic) -> SymbolTable {
         var declsMap = [CanonicalType: ClassDecl]()
         for decl in decls {
             if declsMap[decl.canonicalType] != nil {
@@ -30,6 +32,8 @@ struct SymbolTableBuilder {
             guard symbols.lookup(decl.canonicalType) == nil else { continue }
             try validateDecl(decl, declsMap: declsMap)
         }
+        
+        return symbols
     }
     
     private func validateDecl(
@@ -41,6 +45,7 @@ struct SymbolTableBuilder {
         
         guard let inheritedType = decl.inheritance?.inheritedType else {
             try validateMembers(for: symbol)
+            symbol.superclass = objectSymbol
             symbols.insert(symbol)
             return
         }

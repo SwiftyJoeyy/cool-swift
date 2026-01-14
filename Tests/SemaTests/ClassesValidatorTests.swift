@@ -20,10 +20,8 @@ import Parser
     private func validate(_ source: String) throws -> SymbolTable {
         var (parser, _) = try CoolParser.new(source: source)
         let sourceFile = try parser.parse()
-        let symbols = SymbolTable()
-        try SymbolTableBuilder(symbols: symbols)
+        return try SymbolTableBuilder(interfaceSymbols: .test)
             .build(from: sourceFile.declarations)
-        return symbols
     }
     
 // MARK: - Duplicate Class Tests
@@ -115,7 +113,7 @@ import Parser
     }
     
     @Test func `allows valid inheritance chain`() throws {
-        let expectedClasses = ["Base": nil, "Middle": "Base", "Derived": "Middle"]
+        let expectedClasses = ["Base": "Object", "Middle": "Base", "Derived": "Middle"]
         let source = """
         class Base { };
         class Middle inherits Base { };
@@ -254,7 +252,7 @@ import Parser
 // MARK: - Complex Tests
     @Test func `validates complex class hierarchy with members`() throws {
         let expectedClasses = [
-            "Base": (nil, Set(["x", "foo"])),
+            "Base": ("Object", Set(["x", "foo"])),
             "Middle": ("Base", Set(["y", "bar"])),
             "Derived": ("Middle", Set(["z", "baz"])),
         ]

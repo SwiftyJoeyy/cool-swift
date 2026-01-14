@@ -23,10 +23,6 @@ fileprivate struct ExprMemberDeclVisitor: ExprVisitor {
             throw SemaError.undefinedIdentifier(expr.name)
                 .diagnostic(at: expr.location)
         }
-//        if !decl.available {
-//            throw SemaError.instanceMemberInPropertyInitializer(expr.name)
-//                .diagnostic(at: expr.location)
-//        }
         self.member = decl
     }
     
