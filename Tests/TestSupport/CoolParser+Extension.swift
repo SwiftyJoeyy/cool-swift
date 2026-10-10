@@ -6,16 +6,13 @@
 //
 
 import Foundation
-import AST
-import Basic
-import Diagnostics
 import Lexer
-@testable import Parser
+import Parser
 
-let testFile = "test.cl"
+public let testFile = "test.cl"
 
 extension CoolParser {
-    static func new(
+    public static func new(
         source: String,
         file: String = testFile
     ) throws -> (parser: CoolParser, diagEngine: MockDiagEngine) {

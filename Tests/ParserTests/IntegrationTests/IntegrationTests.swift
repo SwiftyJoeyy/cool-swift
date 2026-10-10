@@ -11,6 +11,7 @@ import AST
 import Basic
 import Diagnostics
 import Lexer
+import TestSupport
 @testable import Parser
 
 protocol TestFile {

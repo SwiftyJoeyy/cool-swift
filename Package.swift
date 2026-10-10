@@ -32,6 +32,8 @@ let package = Package(
         Sema.target,
         Sema.tests,
         
+        TestSupport.target,
+        
         .executableTarget(
             name: "CoolSwift",
             dependencies: [
@@ -158,7 +160,8 @@ enum Parser {
         .testTarget(
             name: "ParserTests",
             dependencies: [
-                Parser.dependency
+                Parser.dependency,
+                TestSupport.dependency
             ],
             resources: [.copy("IntegrationTests/Resources")]
         )
@@ -185,9 +188,25 @@ enum Sema {
         .testTarget(
             name: "SemaTests",
             dependencies: [
-                Sema.dependency
+                Sema.dependency,
+                TestSupport.dependency
             ],
             resources: [.copy("Resources")]
+        )
+    }
+}
+
+enum TestSupport {
+    static let dependency: Target.Dependency = "TestSupport"
+    static var target: Target {
+        .target(
+            name: "TestSupport",
+            dependencies: [
+                Diagnostics.dependency,
+                Lexer.dependency,
+                Parser.dependency
+            ],
+            path: "Tests/TestSupport"
         )
     }
 }

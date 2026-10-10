@@ -12,6 +12,7 @@ import Basic
 import Diagnostics
 import Lexer
 import Parser
+import TestSupport
 @testable import Sema
 
 @Suite struct ModuleInterfaceSymbolsTests {
