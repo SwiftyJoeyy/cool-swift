@@ -2,7 +2,7 @@
 //  TypeSystem.swift
 //  CoolSwift
 //
-//  Created by Joe Maghzal on 30/12/2025.
+//  Created by Joe Maghzal on 26/09/2026.
 //
 
 import Foundation
@@ -10,180 +10,214 @@ import AST
 import Basic
 import Diagnostics
 
-struct Context {
-    let typeSystem: TypeSystem
-    let scope: Scope
+protocol TypeSystem {
+    func typeCheck(_ symbol: ClassSymbol) throws(Diagnostic) -> ResolvedClassDecl
     
-    var selfType: CanonicalType {
-        return scope.selfType
-    }
+    func typeCheck(
+        _ varDecl: VarDecl,
+        scope: any Scope
+    ) throws(Diagnostic) -> ResolvedVarDecl
     
-    func scoped(to scope: some Scope) -> Self {
-        return Context(typeSystem: typeSystem, scope: scope)
-    }
-}
-
-struct TypeSystem {
-    let symbols: SymbolTable
+    func typeCheck(
+        _ funcDecl: FuncDecl,
+        scope: any Scope
+    ) throws(Diagnostic) -> ResolvedFuncDecl
     
-    func checkFlow(
-        from type: CanonicalType,
-        into supertype: CanonicalType
-    ) -> Bool {
-        if type == supertype || supertype == .object {
-            return true
-        }
-        return symbols.lookup(type)?.superclass(supertype) != nil
-    }
+    func typeCheck(
+        _ expr: any Expr,
+        scope: any Scope
+    ) throws(Diagnostic) -> any ResolvedExpr
     
-    func joinedType(
-        _ type1: CanonicalType,
-        _ type2: CanonicalType
-    ) -> CanonicalType {
-        if type1 == type2 {
-            return type1
-        }
-        var symbol1 = symbols.lookup(type1)?.explicitSuperclass
-        var symbol2 = symbols.lookup(type2)?.explicitSuperclass
-        var types: Set<CanonicalType> = [type1, type2]
-        
-        while symbol1 != nil || symbol2 != nil {
-            
-            if let canType1 = symbol1?.canonicalType, !types.insert(canType1).inserted {
-                return canType1
-            }
-            if let canType2 = symbol2?.canonicalType, !types.insert(canType2).inserted {
-                return canType2
-            }
-            symbol1 = symbol1?.explicitSuperclass
-            symbol2 = symbol2?.explicitSuperclass
-        }
-        return .object
-    }
     
-    func lookup(type: CanonicalType) -> ClassSymbol? {
-        return symbols.lookup(type)
-    }
     
     func lookup(
-        member: CanonicalIdentifier,
-        on type: CanonicalType
-    ) -> (any Decl)? {
-        return symbols.lookup(type)?.lookup(member)?.decl
-    }
+        member: String,
+        on type: ResolvedType
+    ) -> SymbolMember?
     
-    private func checkExistence(
-        of type: CanonicalType,
-        loc: SourceLocation
-    ) throws(Diagnostic) {
-        if type == .selfType { return }
-        if lookup(type: type) == nil {
-            throw SemaError.undefinedType(type.type)
-                .diagnostic(at: loc)
-        }
-    }
+    
+    
+    func checkType(
+        _ type: any TypeRef,
+        base: ResolvedType
+    ) throws(Diagnostic) -> ResolvedType
+    
+    func conforms(_ type: ResolvedType, to supertype: ResolvedType) -> Bool
+    
+    func joinedType(
+        _ type1: ResolvedType,
+        _ type2: ResolvedType
+    ) -> ResolvedType
 }
 
-extension TypeSystem {
-    @discardableResult func typeCheck(
-        _ expr: some Expr,
-        with context: Context
-    ) throws(Diagnostic) -> CanonicalType {
-        var typeVisitor = ExprTypeVisitor(context: context)
-        try expr.accept(&typeVisitor)
-        guard let type = typeVisitor.type else {
-            fatalError()
-        }
-        return type.resolved(context.selfType)
+struct DefaultTypeSystem: TypeSystem {
+    private let symbols: SymbolTable
+    
+    init(symbols: SymbolTable) {
+        self.symbols = symbols
     }
     
-    func typeCheck(_ symbol: ClassSymbol) throws(Diagnostic) {
+    func typeCheck(_ symbol: ClassSymbol) throws(Diagnostic) -> ResolvedClassDecl {
+        let scope = ClassScope(symbol: symbol, typeSystem: self)
+        var properties = [ResolvedVarDecl]()
+        var methods = [ResolvedFuncDecl]()
+        
         for member in symbol.members {
             switch member.kind {
                 case .varDecl(let varDecl):
-                    try typeCheck(varDecl, scope: VarDeclScope(symbol: symbol))
+                    properties.append(try typeCheck(varDecl, scope: scope))
                 case .funcDecl(let funcDecl):
-                    try typeCheck(funcDecl, symbol: symbol)
+                    methods.append(try typeCheck(funcDecl, scope: scope))
                 default:
                     break
             }
         }
+        
+        return ResolvedClassDecl(
+            name: symbol.decl.name.value,
+            parent: symbol.superclass?.type ?? .object,
+            properties: properties,
+            methods: methods,
+            decl: symbol.decl
+        )
     }
     
-    func typeCheck(_ funcDecl: FuncDecl, symbol: ClassSymbol) throws(Diagnostic) {
-        var params = [CanonicalIdentifier: ParameterDecl]()
+    func typeCheck(
+        _ varDecl: VarDecl,
+        scope: any Scope
+    ) throws(Diagnostic) -> ResolvedVarDecl {
+        let type = try checkType(varDecl.typeAnnotation.type, base: scope.baseType)
+        var initExpr: (any ResolvedExpr)?
+        if let initializer = varDecl.initializer {
+            let resolvedInit = try typeCheck(
+                initializer.expr,
+                scope: scope
+            )
+            if !conforms(resolvedInit.type, to: type) {
+                throw SemaError.initializerTypeMismatch(
+                    expected: type.name,
+                    got: resolvedInit.type.name
+                ).diagnostic(at: initializer.expr.location)
+            }
+            initExpr = resolvedInit
+        }
+        
+        return ResolvedVarDecl(
+            name: varDecl.name.value,
+            type: type,
+            initializer: initExpr,
+            decl: varDecl
+        )
+    }
+    
+    func typeCheck(
+        _ funcDecl: FuncDecl,
+        scope: any Scope
+    ) throws(Diagnostic) -> ResolvedFuncDecl {
+        let returnType = try checkType(
+            funcDecl.returnClause.type,
+            base: scope.baseType
+        )
+        
+        var params = [String: ResolvedParameterDecl]()
         for param in funcDecl.parameters.parameters {
-            if params[param.name.canonical] != nil {
+            if params[param.name.value] != nil {
                 throw SemaError.duplicateDeclaration(param.name.value)
                     .diagnostic(at: param.name.location)
             }
-            
-            let loc = param.type.location
-            try checkExistence(of: param.type.canonical, loc: loc)
-            params[param.name.canonical] = param
-        }
-        
-        let loc = funcDecl.returnClause.type.location
-        let returnType = funcDecl.returnClause.type.canonical
-            .resolved(symbol.canonicalType)
-        try checkExistence(of: returnType, loc: loc)
-        
-        let bodyType = try typeCheck(
-            funcDecl.body,
-            with: Context(
-                typeSystem: self,
-                scope: FuncDeclScope(symbol: symbol, parameters: params)
+            let resolvedType = try checkType(param.type, base: scope.baseType)
+            params[param.name.value] = ResolvedParameterDecl(
+                name: param.name.value,
+                type: resolvedType,
+                decl: param
             )
-        )
+        }
+        let funcScope = FuncScope(parentScope: scope, parameters: params)
+        let resolvedBody = try typeCheck(funcDecl.body, scope: funcScope)
         
-        if !checkFlow(from: bodyType, into: returnType) {
+        if !conforms(resolvedBody.type, to: returnType) {
             throw SemaError.initializerTypeMismatch(
-                expected: returnType.type,
-                got: bodyType.type
+                expected: returnType.name,
+                got: resolvedBody.type.name
             ).diagnostic(at: funcDecl.body.location)
         }
-    }
-    
-    @discardableResult func typeCheck(
-        _ varDecl: VarDecl,
-        scope: any Scope
-    ) throws(Diagnostic) -> CanonicalType {
-        let loc = varDecl.typeAnnotation.location
-        let type = varDecl.canonicalType.resolved(scope.selfType)
-        try checkExistence(of: type, loc: loc)
         
-        guard let initializer = varDecl.initializer else {
-            return type
-        }
-        let initType = try typeCheck(
-            initializer.expr,
-            with: Context(typeSystem: self, scope: scope)
+        return ResolvedFuncDecl(
+            name: funcDecl.name.value,
+            type: returnType,
+            parentType: scope.baseType,
+            parameters: [],
+            body: resolvedBody,
+            decl: funcDecl
         )
-        if !checkFlow(from: initType, into: type) {
-            throw SemaError.initializerTypeMismatch(
-                expected: type.type,
-                got: initType.type
-            ).diagnostic(at: initializer.expr.location)
-        }
-        return type
     }
     
-    @discardableResult func typeCheck(
-        _ binding: CaseBranch.Binding,
-        with context: Context
-    ) throws(Diagnostic) -> CanonicalType {
-        let loc = binding.typeAnnotation.type.location
-        let type = binding.canonicalType.resolved(context.selfType)
-        try checkExistence(of: type, loc: loc)
-        return type
-    }
-}
-
-extension CanonicalType {
-    func resolved(_ parent: CanonicalType) -> CanonicalType {
-        if self == .selfType {
-            return parent
+    func typeCheck(
+        _ expr: any Expr,
+        scope: any Scope
+    ) throws(Diagnostic) -> any ResolvedExpr {
+        var typeVisitor = ExprTypeVisitor(typeSystem: self, scope: scope)
+        try expr.accept(&typeVisitor)
+        guard let resolved = typeVisitor.resolvedExpr else {
+            fatalError()
         }
-        return self
+        return resolved
+    }
+    
+    func lookup(
+        member: String,
+        on type: ResolvedType
+    ) -> SymbolMember? {
+        return symbols.lookup(type)?.lookup(member)
+    }
+    
+    func checkType(
+        _ type: any TypeRef,
+        base: ResolvedType
+    ) throws(Diagnostic) -> ResolvedType {
+        let resolved = type.resolved == .selfType ? base: type.resolved
+        if symbols.lookup(resolved) == nil {
+            throw SemaError.undefinedType(type.name)
+                .diagnostic(at: type.location)
+        }
+        return resolved
+    }
+    
+    func conforms(_ type: ResolvedType, to supertype: ResolvedType) -> Bool {
+        if type == supertype || supertype == .object {
+            return true
+        }
+        var parent = symbols.lookup(type)?.superclass
+        while parent != nil {
+            if parent?.type == supertype {
+                return true
+            }
+            parent = parent?.superclass
+        }
+        return false
+    }
+    
+    func joinedType(
+        _ type1: ResolvedType,
+        _ type2: ResolvedType
+    ) -> ResolvedType {
+        if type1 == type2 {
+            return type1
+        }
+        var symbol1 = symbols.lookup(type1)?.superclass
+        var symbol2 = symbols.lookup(type2)?.superclass
+        var types: Set<ResolvedType> = [type1, type2]
+        
+        while let t1 = symbol1?.type, let t2 = symbol2?.type {
+            if !types.insert(t1).inserted {
+               return t1
+            }
+            if !types.insert(t2).inserted {
+                return t2
+            }
+            symbol1 = symbol1?.superclass
+            symbol2 = symbol2?.superclass
+        }
+        return .object
     }
 }

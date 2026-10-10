@@ -286,6 +286,23 @@ import Parser
         #expect(error?.message == "use of undeclared type 'C'")
     }
     
+    @Test func `detects undefined member access base type`() throws {
+        let source = """
+        class A { };
+        class B { };
+        class Main {
+            test() : A {
+                (new C)@A
+            };
+        };
+        """
+        
+        let error = #expect(throws: Diagnostic.self) {
+            try analyze(source)
+        }
+        #expect(error?.message == "use of undeclared type 'C'")
+    }
+    
 // MARK: - Function vs Property Tests
     @Test func `detects method used as property`() throws {
         let source = """
@@ -320,7 +337,7 @@ import Parser
         let error = #expect(throws: Diagnostic.self) {
             try analyze(source)
         }
-        #expect(error?.message == "cannot call value of non-function type 'Int'")
+        #expect(error?.message == "cannot call non-function 'value'")
     }
     
 // MARK: - Complex Member Access Tests

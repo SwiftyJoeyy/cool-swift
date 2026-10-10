@@ -22,13 +22,31 @@ public struct Sema {
         self.interfaceSymbols = interfaceSymbols
     }
     
-    public func analyze(_ source: SourceFile) throws(Diagnostic) {
+    public func analyze(_ source: SourceFile) throws(Diagnostic) -> ResolvedSource {
         let symbols = try SymbolTableBuilder(interfaceSymbols: interfaceSymbols)
             .build(from: source.declarations)
-        let typeSystem = TypeSystem(symbols: symbols)
+        let typeSystem = DefaultTypeSystem(symbols: symbols)
         
+        var decls = [ResolvedClassDecl]()
         for symbol in symbols.symbols {
-            try typeSystem.typeCheck(symbol)
+            decls.append(try typeSystem.typeCheck(symbol))
         }
+        
+        return ResolvedSource(declarations: decls)
     }
+    
+//    public func checkEntryPoint(typeSystem: TypeSystem) throws(Diagnostic) {
+//        guard let mainSymbol = typeSystem.lookup(type: .main) else {
+//            throw SemaError.missingMainClass.diagnostic()
+//        }
+//        
+//        guard let mainFunc = mainSymbol.lookup(.main)?.decl as? FuncDecl else {
+//            throw SemaError.missingMainMethod
+//                .diagnostic(at: mainSymbol.decl.location)
+//        }
+//        
+//        guard !mainFunc.parameters.parameters.isEmpty else { return }
+//        throw SemaError.mainMethodCannotHaveParameters
+//            .diagnostic(at: mainFunc.parameters.location)
+//    }
 }

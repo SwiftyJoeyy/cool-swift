@@ -2,7 +2,7 @@
 //  ExprTypeVisitor.swift
 //  CoolSwift
 //
-//  Created by Joe Maghzal on 02/01/2026.
+//  Created by Joe Maghzal on 26/09/2026.
 //
 
 import Foundation
@@ -11,214 +11,246 @@ import Diagnostics
 
 struct ExprTypeVisitor: ExprVisitor {
     typealias Diag = Diagnostic
-    let context: Context
-    var type: CanonicalType?
-    
-    init(context: Context) {
-        self.context = context
-    }
+    let typeSystem: TypeSystem
+    let scope: any Scope
+    private(set) var resolvedExpr: any ResolvedExpr?
     
     mutating func visit(_ expr: StringLiteralExpr) throws(Diag) {
-        type = .string
+        resolvedExpr = ResolvedLiteralExpr(
+            type: .string,
+            value: expr.value,
+            expr: expr
+        )
     }
     
     mutating func visit(_ expr: IntegerLiteralExpr) throws(Diag) {
-        type = .int
+        resolvedExpr = ResolvedLiteralExpr(
+            type: .int,
+            value: expr.value,
+            expr: expr
+        )
     }
     
     mutating func visit(_ expr: BoolLiteralExpr) throws(Diag) {
-        type = .bool
+        resolvedExpr = ResolvedLiteralExpr(
+            type: .bool,
+            value: expr.value,
+            expr: expr
+        )
     }
     
     mutating func visit(_ expr: DeclRefExpr) throws(Diag) {
-        let member = try expr.member(context)
-        guard let binding = member.decl as? BindingDecl else {
-            throw SemaError.funcUsedAsValue(expr.name)
-                .diagnostic(at: expr.location)
+        resolvedExpr = try resolvedRefExpr(expr) { refType, refExpr throws(Diag) in
+            guard case .localDecl(let member) = refType,
+                  case .funcDecl = member.decl.kind
+            else { return }
+            throw SemaError.funcUsedAsValue(refExpr.name)
+                .diagnostic(at: refExpr.location)
         }
-        type = binding.canonicalType.resolved(member.selfType)
     }
     
     mutating func visit(_ expr: FuncCallExpr) throws(Diag) {
-        let member = try expr.calledExpression.member(context)
-        
-        guard let funcDecl = member.decl as? MethodDecl else {
-            let type = try context.typeSystem.typeCheck(
-                expr.calledExpression,
-                with: context
-            )
-            throw SemaError.cannotCallNonFunction(type.type)
-                .diagnostic(at: expr.calledExpression.location)
+        let (base, member, refExpr) = try declMember(from: expr.calledExpression)
+        guard case .localDecl(let symbolMember) = member.refType,
+              let funcDecl = symbolMember.decl.kind.decl as? MethodDecl
+        else {
+            throw SemaError.cannotCallNonFunction(refExpr.name)
+                .diagnostic(at: refExpr.location)
         }
-        
         let paramsCount = funcDecl.parameters.parameters.count
         let argumentsCount = expr.arguments.count
-        for (index, param) in funcDecl.parameters.parameters.enumerated() {
-            guard index < argumentsCount else {
-                throw SemaError.argumentCountMismatch(
-                    expected: paramsCount,
-                    got: argumentsCount
-                ).diagnostic(at: expr.location)
-            }
-            let argument = expr.arguments[index]
-            let argumentType = try context.typeSystem.typeCheck(
-                argument,
-                with: context
-            )
-            
-            let paramType = param.type.canonical.resolved(member.selfType)
-            if !context.typeSystem.checkFlow(from: argumentType, into: paramType) {
-                throw SemaError.argumentTypeMismatch(
-                    expected: paramType.type,
-                    got: argumentType.type
-                ).diagnostic(at: argument.location)
-            }
-        }
-        
-        if argumentsCount > paramsCount {
+        guard paramsCount == argumentsCount else {
             throw SemaError.argumentCountMismatch(
                 expected: paramsCount,
                 got: argumentsCount
             ).diagnostic(at: expr.location)
         }
         
-        type = funcDecl.returnClause.type.canonical.resolved(member.selfType)
+        var arguments = [any ResolvedExpr]()
+        for (index, param) in funcDecl.parameters.parameters.enumerated() {
+            let argument = expr.arguments[index]
+            let resolvedArg = try typeSystem.typeCheck(argument, scope: scope)
+            
+            let paramType = try typeSystem.checkType(param.type, base: base.type)
+            if !typeSystem.conforms(resolvedArg.type, to: paramType) {
+                throw SemaError.argumentTypeMismatch(
+                    expected: paramType.name,
+                    got: resolvedArg.type.name
+                ).diagnostic(at: argument.location)
+            }
+            arguments.append(resolvedArg)
+        }
+        
+        let returnType = funcDecl.returnClause.type
+        let type = try typeSystem.checkType(returnType, base: base.type)
+        resolvedExpr = ResolvedFuncCallExpr(
+            name: funcDecl.name.value,
+            type: type,
+            index: symbolMember.index,
+            arguments: arguments,
+            base: base,
+            expr: expr
+        )
     }
     
     mutating func visit(_ expr: MemberAccessExpr) throws(Diag) {
-        let member = try expr.member(context)
-        guard let binding = member.decl as? BindingDecl else {
-            let member = expr.member
-            throw SemaError.funcUsedAsValue(member.name)
-                .diagnostic(at: member.location)
+        resolvedExpr = try resolvedRefExpr(expr) { refType, refExpr throws(Diag) in
+            guard case .localDecl(let member) = refType,
+                  case .funcDecl = member.decl.kind
+                    else { return }
+            throw SemaError.funcUsedAsValue(refExpr.name)
+                .diagnostic(at: refExpr.location)
         }
-        type = binding.canonicalType.resolved(member.selfType)
     }
     
     mutating func visit(_ expr: StaticDispatchExpr) throws(Diag) {
-        let baseType = try context.typeSystem.typeCheck(expr.base, with: context)
-        guard let decl = context.typeSystem.lookup(type: baseType) else {
-            throw SemaError.undefinedType(baseType.type)
-                .diagnostic(at: expr.base.location)
-        }
-        let dispatchType = expr.type.canonical
-        
-        guard context.typeSystem.lookup(type: dispatchType) != nil else {
-            throw SemaError.undefinedType(dispatchType.type)
-                .diagnostic(at: expr.type.location)
-        }
-        
-        if decl.canonicalType != dispatchType, decl.superclass(dispatchType) == nil {
+        let resolvedBase = try typeSystem.typeCheck(
+            expr.base,
+            scope: scope
+        )
+        let dispatchType = try typeSystem.checkType(expr.type, base: scope.baseType)
+        guard typeSystem.conforms(resolvedBase.type, to: dispatchType) else {
             throw SemaError.invalidStaticDispatch(
-                type: baseType.type,
+                type: resolvedBase.type.name,
                 parent: expr.type.name
             ).diagnostic(at: expr.type.location)
         }
-        type = expr.type.canonical.resolved(context.selfType)
+        resolvedExpr = ResolvedStaticDispatchExpr(
+            base: resolvedBase,
+            type: dispatchType,
+            expr: expr
+        )
     }
     
     mutating func visit(_ expr: IfExpr) throws(Diag) {
-        let typeSystem = context.typeSystem
-        let conditionType = try typeSystem.typeCheck(
+        let resolvedCondition = try typeSystem.typeCheck(
             expr.condition,
-            with: context
+            scope: scope
         )
-        
-        guard conditionType == .bool else {
-            throw SemaError.conditionTypeMismatch(conditionType.type)
+        guard resolvedCondition.type == .bool else {
+            throw SemaError.conditionTypeMismatch(resolvedCondition.type.name)
                 .diagnostic(at: expr.condition.location)
         }
         
-        let thenType = try typeSystem.typeCheck(expr.thenBody, with: context)
-        let elseType = try typeSystem.typeCheck(expr.elseBody, with: context)
-        
-        type = typeSystem.joinedType(thenType, elseType)
+        let resolvedThen = try typeSystem.typeCheck(expr.thenBody, scope: scope)
+        let resolvedElse = try typeSystem.typeCheck(expr.elseBody, scope: scope)
+        resolvedExpr = ResolvedIfExpr(
+            type: typeSystem.joinedType(resolvedThen.type, resolvedElse.type),
+            condition: resolvedCondition,
+            thenBody: resolvedThen,
+            elseBody: resolvedElse,
+            expr: expr
+        )
     }
     
     mutating func visit(_ expr: WhileExpr) throws(Diag) {
-        let typeSystem = context.typeSystem
-        let conditionType = try typeSystem.typeCheck(
+        let resolvedCondition = try typeSystem.typeCheck(
             expr.condition,
-            with: context
+            scope: scope
         )
-        
-        guard conditionType == .bool else {
-            throw SemaError.conditionTypeMismatch(conditionType.type)
+        guard resolvedCondition.type == .bool else {
+            throw SemaError.conditionTypeMismatch(resolvedCondition.type.name)
                 .diagnostic(at: expr.condition.location)
         }
         
-        try typeSystem.typeCheck(expr.body, with: context)
-        type = .object
+        let resolvedBody = try typeSystem.typeCheck(expr.body, scope: scope)
+        resolvedExpr = ResolvedWhileExpr(
+            type: .object,
+            condition: resolvedCondition,
+            body: resolvedBody,
+            expr: expr
+        )
     }
     
     mutating func visit(_ expr: CaseExpr) throws(Diag) {
-        let typeSystem = context.typeSystem
-        _ = try typeSystem.typeCheck(expr.expr, with: context)
+        let expression = try typeSystem.typeCheck(expr.expression, scope: scope)
         
-        var resultType: CanonicalType?
+        var resultType: ResolvedType?
+        var branches = [ResolvedCaseExpr.CaseBranch]()
         for branch in expr.branches {
-            _ = try typeSystem.typeCheck(branch.binding, with: context)
-            
-            let bodyType = try typeSystem.typeCheck(
+            let type = branch.binding.type
+            let name = branch.binding.name
+            let branchType = try typeSystem.checkType(type, base: scope.baseType)
+            let resolvedBody = try typeSystem.typeCheck(
                 branch.body,
-                with: Context(
-                    typeSystem: typeSystem,
-                    scope: CaseBranchScope(
-                        parentScope: context.scope,
-                        binding: branch.binding
-                    )
+                scope: CaseBranchScope(
+                    parentScope: scope,
+                    name: name.value,
+                    type: branchType
                 )
             )
             
             resultType = resultType.map {
-                typeSystem.joinedType($0, bodyType)
-            } ?? bodyType
+                typeSystem.joinedType($0, resolvedBody.type)
+            } ?? resolvedBody.type
+            
+            branches.append(
+                ResolvedCaseExpr.CaseBranch(
+                    type: branchType,
+                    name: name.value,
+                    body: resolvedBody
+                )
+            )
         }
         
-        type = resultType!
+        resolvedExpr = ResolvedCaseExpr(
+            type: resultType!,
+            expression: expression,
+            branches: branches,
+            expr: expr
+        )
     }
     
     mutating func visit(_ expr: LetExpr) throws(Diag) {
-        let environment = LetExprScope.LetExprEnvironment()
-        let scope = LetExprScope(
-            parentScope: context.scope,
+        let environment = LetScope.Environment()
+        let scope = LetScope(
+            parentScope: scope,
             environment: environment
         )
+        
+        var resolvedBindings = [ResolvedVarDecl]()
         for binding in expr.bindings {
-            if environment.lookup(binding.name.canonical) != nil {
+            if environment.lookup(binding.name.value) != nil {
                 throw SemaError.duplicateDeclaration(binding.name.value)
                     .diagnostic(at: binding.location)
             }
-            try context.typeSystem.typeCheck(binding, scope: scope)
+            resolvedBindings.append(try typeSystem.typeCheck(binding, scope: scope))
             environment.insert(binding)
         }
         
-        type = try context.typeSystem.typeCheck(
-            expr.body,
-            with: context.scoped(to: scope)
+        let resolvedBody = try typeSystem.typeCheck(expr.body, scope: scope)
+        resolvedExpr = ResolvedLetExpr(
+            bindings: resolvedBindings,
+            body: resolvedBody,
+            expr: expr
         )
     }
     
     mutating func visit(_ expr: BlockExpr) throws(Diag) {
         assert(!expr.expressions.isEmpty, "Parser should reject empty blocks")
         
-        var returnType: CanonicalType!
+        var expressions = [any ResolvedExpr]()
         for expression in expr.expressions {
-            returnType = try context.typeSystem.typeCheck(expression, with: context)
+            expressions.append(try typeSystem.typeCheck(expression, scope: scope))
         }
-        type = returnType
+        resolvedExpr = ResolvedBlockExpr(
+            expressions: expressions,
+            expr: expr
+        )
     }
     
     mutating func visit(_ expr: OperationExpr) throws(Diag) {
-        let lhsType = try context.typeSystem.typeCheck(expr.lhs, with: context)
-        let rhsType = try context.typeSystem.typeCheck(expr.rhs, with: context)
+        let resolvedLHS = try typeSystem.typeCheck(expr.lhs, scope: scope)
+        let lhsType = resolvedLHS.type
+        let resolvedRHS = try typeSystem.typeCheck(expr.rhs, scope: scope)
+        let rhsType = resolvedRHS.type
         let op = expr.op
         
         if op.op == .equal, lhsType != rhsType, (lhsType.isBasicType || rhsType.isBasicType) {
             throw SemaError.binaryOperatorTypeMismatch(
                 op: op.description,
-                lhs: lhsType.type,
-                rhs: rhsType.type
+                lhs: lhsType.name,
+                rhs: rhsType.name
             ).diagnostic(at: op.location)
         } else if op.op != .equal, lhsType != .int || rhsType != .int {
             throw SemaError.binaryOperatorInvalidType(
@@ -227,65 +259,140 @@ struct ExprTypeVisitor: ExprVisitor {
             ).diagnostic(at: op.location)
         }
         
-        type = op.op.isComparison ? .bool: .int
+        resolvedExpr = ResolvedOperationExpr(
+            type: op.op.isComparison ? .bool: .int,
+            lhs: resolvedLHS,
+            op: op,
+            rhs: resolvedRHS,
+            expr: expr
+        )
     }
     
     mutating func visit(_ expr: AssignmentExpr) throws(Diag) {
-        let target = expr.target
-        let member = try target.member(context)
-        guard let binding = member.decl as? BindingDecl else {
-            throw SemaError.cannotAssignToFunc(member.decl.name.value)
-                .diagnostic(at: target.location)
+        let resolvedTarget = try resolvedRefExpr(expr.target) { refType, refExpr throws(Diag) in
+            guard case .localDecl(let member) = refType,
+                  case .funcDecl = member.decl.kind
+                    else { return }
+            throw SemaError.cannotAssignToFunc(refExpr.name)
+                .diagnostic(at: refExpr.location)
         }
-        let varType = binding.canonicalType.resolved(member.selfType)
-        let valueType = try context.typeSystem.typeCheck(expr.value, with: context)
         
-        if !context.typeSystem.checkFlow(from: valueType, into: varType) {
+        let resolvedValue = try typeSystem.typeCheck(expr.value, scope: scope)
+        guard typeSystem.conforms(resolvedValue.type, to: resolvedTarget.type) else {
             throw SemaError.assignmentTypeMismatch(
-                expected: varType.type,
-                got: valueType.type
+                expected: resolvedTarget.type.name,
+                got: resolvedValue.type.name
             ).diagnostic(at: expr.value.location)
         }
-        
-        type = varType
+        resolvedExpr = ResolvedAssignmentExpr(
+            target: resolvedTarget,
+            value: resolvedValue,
+            expr: expr
+        )
     }
     
     mutating func visit(_ expr: NewExpr) throws(Diag) {
-        let canonicalType = expr.type.canonical.resolved(context.selfType)
-        if context.typeSystem.lookup(type: canonicalType) == nil {
-            throw SemaError.undefinedType(expr.type.name)
-                .diagnostic(at: expr.type.location)
-        }
-        type = canonicalType
+        let resolvedType = try typeSystem.checkType(expr.type, base: scope.baseType)
+        resolvedExpr = ResolvedNewExpr(
+            type: resolvedType,
+            expr: expr
+        )
     }
     
     mutating func visit(_ expr: NotExpr) throws(Diag) {
-        let exprType = try context.typeSystem.typeCheck(
-            expr.expression,
-            with: context
-        )
-        guard exprType == .bool else {
+        let expression = try typeSystem.typeCheck(expr.expression, scope: scope)
+        guard expression.type == .bool else {
             throw SemaError.unaryOperatorInvalidType(op: "not", expected: "Bool")
                 .diagnostic(at: expr.expression.location)
         }
-        type = .bool
+        resolvedExpr = ResolvedNotExpr(
+            type: .bool,
+            expression: expression,
+            expr: expr
+        )
     }
     
     mutating func visit(_ expr: IsVoidExpr) throws(Diag) {
-        _ = try context.typeSystem.typeCheck(expr.expression, with: context)
-        type = .bool
+        let expression = try typeSystem.typeCheck(expr.expression, scope: scope)
+        resolvedExpr = ResolvedIsVoidExpr(
+            type: .bool,
+            expression: expression,
+            expr: expr
+        )
     }
     
     mutating func visit(_ expr: ComplementExpr) throws(Diagnostic) {
-        let exprType = try context.typeSystem.typeCheck(
-            expr.expression,
-            with: context
-        )
-        guard exprType == .int else {
+        let expression = try typeSystem.typeCheck(expr.expression, scope: scope)
+        guard expression.type == .int else {
             throw SemaError.unaryOperatorInvalidType(op: "~", expected: "Int")
                 .diagnostic(at: expr.expression.location)
         }
-        type = .int
+        resolvedExpr = ResolvedComplementExpr(
+            type: .int,
+            expression: expression,
+            expr: expr
+        )
+    }
+    
+    private func resolvedRefExpr(
+        _ expr: any Expr,
+        validate: (ScopedMember.RefType, DeclRefExpr) throws(Diag) -> Void
+    ) throws(Diag) -> ResolvedDeclRefExpr {
+        let (base, member, refExpr) = try declMember(from: expr)
+        
+        try validate(member.refType, refExpr)
+        let refType: DeclRefType = switch member.refType {
+            case .parameter: .parameter
+            case .letBinding: .letBinding
+            case .caseBranch: .caseBranch
+            case .selfRef: .selfRef
+            case .localDecl(let member): .localDecl(index: member.index, base: base)
+        }
+        return ResolvedDeclRefExpr(
+            name: member.name,
+            type: member.type,
+            refType: refType,
+            expr: expr
+        )
+    }
+    
+    private func declMember(
+        from expr: any Expr
+    ) throws(Diag) -> (base: DeclRefBase, member: ScopedMember, expr: DeclRefExpr) {
+        if let refExpr = expr as? DeclRefExpr {
+            if refExpr.name == "self" {
+                return (.selfRef(scope.baseType), ScopedMember(name: "self", type: scope.baseType, refType: .selfRef), refExpr)
+            }
+            guard let member = try scope.lookup(member: refExpr.name) else {
+                throw SemaError.undefinedIdentifier(refExpr.name)
+                    .diagnostic(at: expr.location)
+            }
+            return (.selfRef(scope.baseType), member, refExpr)
+        } else if let accessExpr = expr as? MemberAccessExpr {
+            let resolvedBase = try typeSystem.typeCheck(
+                accessExpr.base,
+                scope: scope
+            )
+            guard let symbolMember = typeSystem.lookup(
+                member: accessExpr.member.name,
+                on: resolvedBase.type
+            ) else {
+                throw SemaError.undefinedMember(
+                    member: accessExpr.member.name,
+                    baseType: resolvedBase.type.name
+                ).diagnostic(at: accessExpr.member.location)
+            }
+            
+            let type = try typeSystem.checkType(symbolMember.decl.type, base: symbolMember.parent)
+            let member = ScopedMember(
+                name: symbolMember.decl.name.value,
+                type: type,
+                refType: .localDecl(symbolMember)
+            )
+            return (.expr(resolvedBase), member, accessExpr.member)
+        }
+        
+        fatalError()
     }
 }
 

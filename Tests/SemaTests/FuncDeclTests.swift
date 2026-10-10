@@ -208,7 +208,7 @@ import Parser
         try analyze(source)
     }
     
-    @Test func `allows subtype as return type in override`() throws {
+    @Test func `detects subtype as return type in override`() throws {
         let source = """
         class Animal { };
         class Dog inherits Animal { };
@@ -225,7 +225,10 @@ import Parser
         };
         """
         
-        try analyze(source)
+        let error = #expect(throws: Diagnostic.self) {
+            try analyze(source)
+        }
+        #expect(error?.message == "func override mismatch")
     }
     
 // MARK: - Complex Body Tests

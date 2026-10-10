@@ -29,7 +29,7 @@ import Parser
         let source = "class Foo { };"
         let symbols = try loadInterface(source)
         
-        let fooSymbol = try #require(symbols.lookup(CanonicalType(type: "Foo")))
+        let fooSymbol = try #require(symbols.lookup(ResolvedType(name: "Foo")))
         #expect(fooSymbol.decl.name.value == "Foo")
         #expect(fooSymbol.members.isEmpty)
     }
@@ -42,13 +42,13 @@ import Parser
         """
         let symbols = try loadInterface(source)
         
-        let fooSymbol = try #require(symbols.lookup(CanonicalType(type: "Foo")))
+        let fooSymbol = try #require(symbols.lookup(ResolvedType(name: "Foo")))
         #expect(fooSymbol.decl.name.value == "Foo")
         
-        let barSymbol = try #require(symbols.lookup(CanonicalType(type: "Bar")))
+        let barSymbol = try #require(symbols.lookup(ResolvedType(name: "Bar")))
         #expect(barSymbol.decl.name.value == "Bar")
         
-        let bazSymbol = try #require(symbols.lookup(CanonicalType(type: "Baz")))
+        let bazSymbol = try #require(symbols.lookup(ResolvedType(name: "Baz")))
         #expect(bazSymbol.decl.name.value == "Baz")
     }
     
@@ -62,10 +62,10 @@ import Parser
         """
         let symbols = try loadInterface(source)
         
-        let fooSymbol = try #require(symbols.lookup(CanonicalType(type: "Foo")))
+        let fooSymbol = try #require(symbols.lookup(ResolvedType(name: "Foo")))
         #expect(fooSymbol.members.count == 2)
         
-        let members = fooSymbol.members.compactMap { $0 as? InterfaceFuncDecl }
+        let members = fooSymbol.members.compactMap { $0.kind.decl as? InterfaceFuncDecl }
         #expect(members.count == 2)
         
         let names = Set(members.map(\.name.value))
@@ -81,10 +81,10 @@ import Parser
         """
         let symbols = try loadInterface(source)
         
-        let fooSymbol = try #require(symbols.lookup(CanonicalType(type: "Foo")))
+        let fooSymbol = try #require(symbols.lookup(ResolvedType(name: "Foo")))
         #expect(fooSymbol.members.count == 2)
         
-        let members = fooSymbol.members.compactMap { $0 as? InterfaceVarDecl }
+        let members = fooSymbol.members.compactMap { $0.kind.decl as? InterfaceVarDecl }
         #expect(members.count == 2)
         
         let names = Set(members.map(\.name.value))
@@ -102,13 +102,13 @@ import Parser
         """
         let symbols = try loadInterface(source)
         
-        let fooSymbol = try #require(symbols.lookup(CanonicalType(type: "Foo")))
+        let fooSymbol = try #require(symbols.lookup(ResolvedType(name: "Foo")))
         #expect(fooSymbol.members.count == 4)
         
-        let funcMembers = fooSymbol.members.compactMap { $0 as? InterfaceFuncDecl }
+        let funcMembers = fooSymbol.members.compactMap { $0.kind.decl as? InterfaceFuncDecl }
         #expect(funcMembers.count == 2)
         
-        let varMembers = fooSymbol.members.compactMap { $0 as? InterfaceVarDecl }
+        let varMembers = fooSymbol.members.compactMap { $0.kind.decl as? InterfaceVarDecl }
         #expect(varMembers.count == 2)
     }
     
@@ -120,10 +120,10 @@ import Parser
         """
         let symbols = try loadInterface(source)
         
-        let baseSymbol = try #require(symbols.lookup(CanonicalType(type: "Base")))
+        let baseSymbol = try #require(symbols.lookup(ResolvedType(name: "Base")))
         #expect(baseSymbol.decl.name.value == "Base")
         
-        let derivedSymbol = try #require(symbols.lookup(CanonicalType(type: "Derived")))
+        let derivedSymbol = try #require(symbols.lookup(ResolvedType(name: "Derived")))
         #expect(derivedSymbol.decl.name.value == "Derived")
         #expect(derivedSymbol.superclass?.decl.name.value == "Base")
     }
@@ -136,13 +136,13 @@ import Parser
         """
         let symbols = try loadInterface(source)
         
-        let baseSymbol = try #require(symbols.lookup(CanonicalType(type: "Base")))
+        let baseSymbol = try #require(symbols.lookup(ResolvedType(name: "Base")))
         #expect(baseSymbol.decl.name.value == "Base")
         
-        let middleSymbol = try #require(symbols.lookup(CanonicalType(type: "Middle")))
+        let middleSymbol = try #require(symbols.lookup(ResolvedType(name: "Middle")))
         #expect(middleSymbol.superclass?.decl.name.value == "Base")
         
-        let derivedSymbol = try #require(symbols.lookup(CanonicalType(type: "Derived")))
+        let derivedSymbol = try #require(symbols.lookup(ResolvedType(name: "Derived")))
         #expect(derivedSymbol.superclass?.decl.name.value == "Middle")
     }
     
@@ -151,8 +151,8 @@ import Parser
         let source = "class Foo { };"
         let symbols = try loadInterface(source)
         
-        #expect(symbols.lookup(CanonicalType(type: "Bar")) == nil)
-        #expect(symbols.lookup(CanonicalType(type: "Baz")) == nil)
+        #expect(symbols.lookup(ResolvedType(name: "Bar")) == nil)
+        #expect(symbols.lookup(ResolvedType(name: "Baz")) == nil)
     }
     
     @Test func `lookup returns correct symbols`() throws {
@@ -162,13 +162,13 @@ import Parser
         """
         let symbols = try loadInterface(source)
         
-        let fooSymbol = try #require(symbols.lookup(CanonicalType(type: "Foo")))
+        let fooSymbol = try #require(symbols.lookup(ResolvedType(name: "Foo")))
         #expect(fooSymbol.decl.name.value == "Foo")
         
-        let barSymbol = try #require(symbols.lookup(CanonicalType(type: "Bar")))
+        let barSymbol = try #require(symbols.lookup(ResolvedType(name: "Bar")))
         #expect(barSymbol.decl.name.value == "Bar")
         
-        #expect(fooSymbol.canonicalType != barSymbol.canonicalType)
+        #expect(fooSymbol.type != barSymbol.type)
     }
     
 // MARK: - Error Cases

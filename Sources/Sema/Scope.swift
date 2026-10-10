@@ -2,82 +2,96 @@
 //  Scope.swift
 //  CoolSwift
 //
-//  Created by Joe Maghzal on 31/12/2025.
+//  Created by Joe Maghzal on 26/09/2026.
 //
 
 import Foundation
 import AST
+import Diagnostics
 
 protocol Scope {
-    var selfType: CanonicalType { get }
-    func lookup(member: CanonicalIdentifier) -> ScopedMember?
+    var baseType: ResolvedType { get }
+    func lookup(member: String) throws(Diagnostic) -> ScopedMember?
 }
 
 struct ScopedMember {
-    let decl: any Decl
-    let selfType: CanonicalType
+    let name: String
+    let type: ResolvedType
+    let refType: RefType
     
-    init?(_ decl: (any Decl)?, selfType: CanonicalType) {
-        guard let decl else {
+    enum RefType {
+        case parameter, letBinding, caseBranch, selfRef
+        case localDecl(SymbolMember)
+    }
+}
+
+struct ClassScope: Scope {
+    let symbol: ClassSymbol
+    let typeSystem: any TypeSystem
+    var baseType: ResolvedType {
+        return symbol.type
+    }
+    
+    func lookup(member: String) throws(Diagnostic) -> ScopedMember? {
+        guard let symbolMember = symbol.lookup(member) else {
             return nil
         }
-        self.decl = decl
-        self.selfType = selfType
+        let type = try typeSystem.checkType(symbolMember.decl.type, base: symbolMember.parent)
+        return ScopedMember(
+            name: symbolMember.decl.name.value,
+            type: type,
+            refType: .localDecl(symbolMember)
+        )
     }
 }
 
-struct VarDeclScope: Scope {
-    let symbol: ClassSymbol
-    
-    var selfType: CanonicalType {
-        return symbol.canonicalType
-    }
-    
-    func lookup(member: CanonicalIdentifier) -> ScopedMember? {
-        return ScopedMember(symbol.lookup(member)?.decl, selfType: selfType)
-    }
-}
-
-struct FuncDeclScope: Scope {
-    let symbol: ClassSymbol
-    let parameters: [CanonicalIdentifier: ParameterDecl]
-    
-    var selfType: CanonicalType {
-        return symbol.canonicalType
-    }
-    
-    func lookup(member: CanonicalIdentifier) -> ScopedMember? {
-        if let param = parameters[member] {
-            return ScopedMember(param, selfType: selfType)
-        }
-        return ScopedMember(symbol.lookup(member)?.decl, selfType: selfType)
-    }
-}
-
-struct LetExprScope: Scope {
+struct FuncScope: Scope {
     let parentScope: any Scope
-    let environment: LetExprEnvironment
+    let parameters: [String: ResolvedParameterDecl]
     
-    var selfType: CanonicalType {
-        return parentScope.selfType
+    var baseType: ResolvedType {
+        return parentScope.baseType
     }
     
-    func lookup(member: CanonicalIdentifier) -> ScopedMember? {
+    func lookup(member: String) throws(Diagnostic) -> ScopedMember? {
+        if let param = parameters[member] {
+            return ScopedMember(
+                name: param.name,
+                type: param.type,
+                refType: .parameter
+            )
+        }
+        return try parentScope.lookup(member: member)
+    }
+}
+
+struct LetScope: Scope {
+    let parentScope: any Scope
+    let environment: Environment
+    
+    var baseType: ResolvedType {
+        return parentScope.baseType
+    }
+    
+    func lookup(member: String) throws(Diagnostic) -> ScopedMember? {
         if let decl = environment.lookup(member) {
-            return ScopedMember(decl, selfType: selfType)
+            return ScopedMember(
+                name: decl.name.value,
+                type: decl.type.resolved,
+                refType: .letBinding
+            )
         }
-        return parentScope.lookup(member: member)
+        return try parentScope.lookup(member: member)
     }
     
-    class LetExprEnvironment {
-        private var bindings = [CanonicalIdentifier: any Decl]()
+    class Environment {
+        private var bindings = [String: VarDecl]()
         
-        func insert(_ binding: some Decl) {
-            guard bindings[binding.name.canonical] == nil else { return }
-            bindings[binding.name.canonical] = binding
+        func insert(_ binding: VarDecl) {
+            guard bindings[binding.name.value] == nil else { return }
+            bindings[binding.name.value] = binding
         }
-        
-        func lookup(_ name: CanonicalIdentifier) -> (any Decl)? {
+        func lookup(_ name: String) -> VarDecl? {
             return bindings[name]
         }
     }
@@ -85,16 +99,17 @@ struct LetExprScope: Scope {
 
 struct CaseBranchScope: Scope {
     let parentScope: any Scope
-    let binding: CaseBranch.Binding
+    let name: String
+    let type: ResolvedType
     
-    var selfType: CanonicalType {
-        return parentScope.selfType
+    var baseType: ResolvedType {
+        return parentScope.baseType
     }
     
-    func lookup(member: CanonicalIdentifier) -> ScopedMember? {
-        if member == binding.name.canonical {
-            return ScopedMember(binding, selfType: selfType)
+    func lookup(member: String) throws(Diagnostic) -> ScopedMember? {
+        if member == name {
+            return ScopedMember(name: name, type: type, refType: .caseBranch)
         }
-        return parentScope.lookup(member: member)
+        return try parentScope.lookup(member: member)
     }
 }

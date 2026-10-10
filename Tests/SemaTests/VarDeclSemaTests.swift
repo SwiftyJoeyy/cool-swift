@@ -328,7 +328,7 @@ import Parser
         let error = #expect(throws: Diagnostic.self) {
             try analyze(source)
         }
-        #expect(error?.message == "cannot call value of non-function type 'Int'")
+        #expect(error?.message == "cannot call non-function 'value'")
     }
     
 // MARK: - Complex Initializer Tests

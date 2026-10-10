@@ -11,17 +11,19 @@ import Basic
 import Diagnostics
 
 public class ModuleInterfaceSymbols {
-    private var symbols = [CanonicalType: ClassSymbol]()
+    private(set) var symbols = [ResolvedType: ClassSymbol]()
+    
+    public init() { }
     
     public func load(_ source: InterfaceFile) throws(Diagnostic) {
         let symbolTable = try SymbolTableBuilder(interfaceSymbols: self)
             .build(from: source.declarations)
         for symbol in symbolTable.symbols {
-            symbols[symbol.canonicalType] = symbol
+            symbols[symbol.type] = symbol
         }
     }
     
-    internal func lookup(_ type: CanonicalType) -> ClassSymbol? {
+    func lookup(_ type: ResolvedType) -> ClassSymbol? {
         return symbols[type]
     }
 }
