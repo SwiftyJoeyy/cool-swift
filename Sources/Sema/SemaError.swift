@@ -15,6 +15,9 @@ public enum SemaError {
     case cyclicInheritance(String)
     case selfInheritance(String)
     case duplicateDeclaration(String)
+    case cannotOverrideProperty(String)
+    case funcOverrideMismatch([FuncOverrideDiff])
+    case propertyCannotOverrideFunc(String)
     case undefinedType(String)
     case undefinedIdentifier(String)
     case funcUsedAsValue(String)
@@ -30,8 +33,21 @@ public enum SemaError {
     case conditionTypeMismatch(String)
     case typeMismatch(expected: String, got: String)
     case cannotAssignToFunc(String)
+    case invalidAssignment(String)
     case unaryOperatorInvalidType(op: String, expected: String)
     case binaryOperatorInvalidType(op: String, expected: String)
+    case missingMainClass
+    case missingMainMethod
+    case mainMethodCannotHaveParameters
+}
+
+public enum FuncOverrideDiff {
+    case returnTypeMismatch(expected: String, got: any TypeRef)
+    case paramNameMismatch(expected: String, got: Identifier)
+    case paramTypeMismatch(expected: String, got: any TypeRef)
+    case extraParam(ParameterDecl)
+    case missingParam(ParameterDecl)
+    case wrongIndex(param: ParameterDecl, expected: Int, got: Int)
 }
 
 extension SemaError: DiagnosticConvertible {
@@ -55,6 +71,12 @@ extension SemaError: DiagnosticConvertible {
                 return "class '\(name)' inherits from itself"
             case .duplicateDeclaration(let name):
                 return "invalid redeclaration of '\(name)'"
+            case .cannotOverrideProperty(let name):
+                return "overriding a property is not allowed: '\(name)'"
+            case .funcOverrideMismatch:
+                return "func override mismatch"
+            case .propertyCannotOverrideFunc(let name):
+                return "Property '\(name)' cannot override func '\(name)'"
             case .undefinedType(let name):
                 return "use of undeclared type '\(name)'"
             case .undefinedIdentifier(let name):
@@ -71,8 +93,8 @@ extension SemaError: DiagnosticConvertible {
                 return "cannot use instance member '\(name)' within property initializer; property initializers run before 'self' is available"
             case .invalidStaticDispatch(let type, let parent):
                 return "type '\(type)' does not inherit from '\(parent)'"
-            case .cannotCallNonFunction(let type):
-                return "cannot call value of non-function type '\(type)'"
+            case .cannotCallNonFunction(let name):
+                return "cannot call non-function '\(name)'"
             case .argumentCountMismatch(let expected, let got):
                 if got < expected {
                     return "missing argument for parameter in call"
@@ -89,10 +111,18 @@ extension SemaError: DiagnosticConvertible {
                 return "cannot convert value of type '\(got)' to expected type '\(expected)'"
             case .cannotAssignToFunc(let name):
                 return "cannot assign to method '\(name)'"
+            case .invalidAssignment(let expr):
+                return "cannot assign to '\(expr)'"
             case .unaryOperatorInvalidType(let op, let expected):
                 return "'\(op)' can only be applied to an operand of type '\(expected)'"
             case .binaryOperatorInvalidType(let op, let expected):
                 return "binary operator '\(op)' can only be applied to operands of type '\(expected)'"
+            case .missingMainClass:
+                return "program must contain a 'Main' class"
+            case .missingMainMethod:
+                return "'Main' class must contain a 'main()' method"
+            case .mainMethodCannotHaveParameters:
+                return "'main()' method cannot have parameters"
         }
     }
 }

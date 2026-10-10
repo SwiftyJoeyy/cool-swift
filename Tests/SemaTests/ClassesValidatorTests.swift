@@ -184,12 +184,12 @@ import Parser
         let table = try validate(source)
         
         for item in table.symbols {
-            let identifier = CanonicalIdentifier(name: "foo")
-            #expect(item.lookup(identifier)?.parent.type == item.canonicalType.type)
+            let identifier = "foo"
+            #expect(item.lookup(identifier)?.parent == item.type)
         }
     }
     
-    @Test func `allows variable override`() throws {
+    @Test func `detects variable override`() throws {
         let source = """
         class Base {
             x : Int;
@@ -199,12 +199,10 @@ import Parser
         };
         """
         
-        let table = try validate(source)
-        
-        for item in table.symbols {
-            let identifier = CanonicalIdentifier(name: "x")
-            #expect(item.lookup(identifier)?.parent.type == item.canonicalType.type)
+        let error = #expect(throws: Diagnostic.self) {
+            try validate(source)
         }
+        #expect(error?.message == "overriding a property is not allowed: 'x'")
     }
     
     @Test func `allows different members in parent and child`() throws {
@@ -298,9 +296,9 @@ import Parser
         let table = try validate(source)
         
         for item in table.symbols {
-            let identifier = CanonicalIdentifier(name: "foo")
-            let expectedParent = expectedParents[item.canonicalType.type]
-            #expect(item.lookup(identifier)?.parent.type == expectedParent)
+            let identifier = "foo"
+            let expectedParent = expectedParents[item.type.name]
+            #expect(item.lookup(identifier)?.parent.name == expectedParent)
         }
     }
 }
