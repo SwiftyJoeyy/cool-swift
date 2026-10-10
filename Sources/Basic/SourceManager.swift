@@ -1,4 +1,4 @@
-//
+ //
 //  SourceManager.swift
 //  CoolSwift
 //
@@ -15,7 +15,7 @@ public protocol SourceManageable {
 }
 
 public enum SourceError: Error {
-    case failedToRegisterFile
+    case failedToRegisterFile(any Error)
 }
 
 public class SourceManager: SourceManageable {
@@ -33,7 +33,7 @@ public class SourceManager: SourceManageable {
             let lines = contents.split(separator: "\n").map({String($0)})
             files[filePath] = File(path: filePath, contents: contents, lines: lines)
         } catch {
-            throw .failedToRegisterFile
+            throw .failedToRegisterFile(error)
         }
     }
     
