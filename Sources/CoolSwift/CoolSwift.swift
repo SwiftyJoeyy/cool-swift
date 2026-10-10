@@ -8,7 +8,6 @@ import ArgumentParser
 import Foundation
 import Lexer
 import Basic
-import CodeGen
 import Sema
 import Diagnostics
 import Parser
@@ -31,12 +30,12 @@ struct CoolCommand: ParsableCommand {
     var emitIR: Bool = false
     
     mutating func run() throws {
-        let outputURL: URL
-        if emitIR {
-            outputURL = input.deletingPathExtension().appendingPathExtension("ll")
-        } else {
-            outputURL = input.deletingPathExtension().appendingPathExtension("ll")
-        }
+//        let outputURL: URL
+//        if emitIR {
+//            outputURL = input.deletingPathExtension().appendingPathExtension("ll")
+//        } else {
+//            outputURL = input.deletingPathExtension().appendingPathExtension("ll")
+//        }
         
 //        let sourceManager = SourceManager()
 //        try sourceManager.registerFile(input.path(percentEncoded: false))
