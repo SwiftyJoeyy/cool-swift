@@ -40,19 +40,43 @@ extension ParserError: DiagnosticConvertible {
         return .error
     }
     
-    #warning("Add messages")
     public var message: String {
-        return "\(self)"
+        switch self {
+        case .unexpectedTopLevelDeclaration:
+            return "Unexpected top-level declaration"
+        case .expectedClassName:
+            return "Expected class name"
+        case .unexpectedDeclaration:
+            return "Unexpected declaration"
+        case .expectedVarName:
+            return "Expected variable name"
+        case .expectedTypeAnnotation:
+            return "Expected type annotation"
+        case .expectedFuncName:
+            return "Expected function name"
+        case .expectedParamName:
+            return "Expected parameter name"
+        case .unexpectedExpression:
+            return "Unexpected expression"
+        case .expectedMemberName:
+            return "Expected member name"
+        case .expectedType:
+            return "Expected type"
+        case .expectedSymbol(let symbol):
+                return "Expected '\(symbol.rawValue)'"
+        case .expectedKeyword(let keyword):
+            return "Expected '\(keyword.rawValue)' keyword"
+        }
     }
 }
 
-public enum SyntaxSymbol {
-    case arrow
-    case colon
-    case comma
-    case leftBrace
-    case leftParen
-    case rightBrace
-    case rightParen
-    case semicolon
+public enum SyntaxSymbol: String {
+    case arrow = "=>"
+    case colon = "."
+    case comma = ","
+    case leftBrace = "{"
+    case leftParen = "("
+    case rightBrace = "}"
+    case rightParen = ")"
+    case semicolon = ";"
 }
