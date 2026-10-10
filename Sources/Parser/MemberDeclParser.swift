@@ -14,16 +14,16 @@ import Lexer
 public protocol MemberDeclParser {
     func parse(
         from parser: inout CoolParser
-    ) throws(Diagnostic) -> any Decl
+    ) throws(Diagnostic) -> MemberDecl
 }
 
 public struct DefaultMemberDeclParser: MemberDeclParser {
-    public func parse(from parser: inout CoolParser) throws(Diagnostic) -> any Decl {
+    public func parse(from parser: inout CoolParser) throws(Diagnostic) -> MemberDecl {
         let nextToken = try parser.advanced()
         if nextToken.kind == .colon {
-            return try VarDeclParser.parse(from: &parser)
+            return MemberDecl(try VarDeclParser.parse(from: &parser))
         } else if nextToken.kind == .leftParen {
-            return try FuncDeclParser.parse(from: &parser)
+            return MemberDecl(try FuncDeclParser.parse(from: &parser))
         }
         
         throw ParserError.unexpectedDeclaration
@@ -32,12 +32,12 @@ public struct DefaultMemberDeclParser: MemberDeclParser {
 }
 
 public struct InterfaceMemberDeclParser: MemberDeclParser {
-    public func parse(from parser: inout CoolParser) throws(Diagnostic) -> any Decl {
+    public func parse(from parser: inout CoolParser) throws(Diagnostic) -> MemberDecl {
         let nextToken = try parser.advanced()
         if nextToken.kind == .colon {
-            return try InterfaceVarDeclParser.parse(from: &parser)
+            return MemberDecl(try InterfaceVarDeclParser.parse(from: &parser))
         } else if nextToken.kind == .leftParen {
-            return try InterfaceFuncDeclParser.parse(from: &parser)
+            return MemberDecl(try InterfaceFuncDeclParser.parse(from: &parser))
         }
         
         throw ParserError.unexpectedDeclaration

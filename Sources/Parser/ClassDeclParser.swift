@@ -77,7 +77,7 @@ internal struct ClassDeclParser<P: MemberDeclParser> {
         if try parser.advance().kind == .rightBrace {
             return MembersBlock(members: [], location: braceLocation)
         }
-        var members = [any Decl]()
+        var members = [MemberDecl]()
         
         while !parser.at(.rightBrace) && !parser.at(.endOfFile) {
             do throws(Diagnostic) {

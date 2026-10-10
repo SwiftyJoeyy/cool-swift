@@ -10,8 +10,6 @@ import Basic
 
 public protocol Decl: ASTNode {
     var name: Identifier { get }
-    
-    var kind: DeclKind { get }
 }
 
 public protocol BindingDecl: Decl {
