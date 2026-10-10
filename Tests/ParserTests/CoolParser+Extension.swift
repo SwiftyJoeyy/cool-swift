@@ -12,10 +12,12 @@ import Diagnostics
 import Lexer
 @testable import Parser
 
+let testFile = "test.cl"
+
 extension CoolParser {
     static func new(
         source: String,
-        file: String = "test.cl"
+        file: String = testFile
     ) throws -> (parser: CoolParser, diagEngine: MockDiagEngine) {
         let diagEngine = MockDiagEngine()
         let parser = try CoolParser(

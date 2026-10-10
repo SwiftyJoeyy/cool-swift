@@ -313,6 +313,13 @@ import Lexer
         #expect(memberAccExpr.member.name == "f")
     }
     
+    @Test func `reports error when the accessed member is not valid`() throws {
+        let error = #expect(throws: Diagnostic.self) {
+            _ = try parse("obj.1")
+        }
+        #expect(error?.id == ParserError.expectedMemberName.id)
+    }
+    
 // MARK: - Static Dispatch Tests
     @Test func `parses static dispatch`() throws {
         let expr = try parse("obj@Type")
