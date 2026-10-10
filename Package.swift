@@ -36,8 +36,11 @@ let package = Package(
             name: "CoolSwift",
             dependencies: [
                 ArgumentParser.dependency,
-                Lexer.dependency
-            ]
+                Lexer.dependency,
+                Sema.dependency,
+                Parser.dependency
+            ],
+            resources: [.copy("Resources")]
         ),
     ]
 )
@@ -52,6 +55,35 @@ enum ArgumentParser {
         return Package.Dependency.package(
             url: "https://github.com/apple/swift-argument-parser.git",
             from: "1.2.0"
+        )
+    }
+}
+
+
+enum LLVMBindings {
+    static var swiftSettings: [SwiftSetting]? {
+        let llvmHeaderPath = "/Users/joemaghzal/Documents/swift-project/llvm-project/llvm/include"
+        let llvmModuleMapPath = "\(llvmHeaderPath)/module.modulemap"
+        let llvmGeneratedHeaderPath = "/Users/joemaghzal/Documents/swift-project/build/Ninja-RelWithDebInfoAssert+swift-DebugAssert/llvm-macosx-arm64/include"
+        return [
+            .interoperabilityMode(.Cxx),
+            .unsafeFlags([
+                "-I\(llvmHeaderPath)",
+                "-Xcc", "-I\(llvmHeaderPath)",
+                "-I\(llvmGeneratedHeaderPath)",
+                "-Xcc", "-I\(llvmGeneratedHeaderPath)",
+                "-Xcc", "-fmodule-map-file=\(llvmModuleMapPath)",
+            ]),
+        ]
+    }
+    static let dependency = Target.Dependency.product(
+        name: "SwiftLLVM_Utils",
+        package: "swift-llvm-bindings-llvm.org-main"
+    )
+    
+    static var package: Package.Dependency {
+        return Package.Dependency.package(
+            path: "../swift-llvm-bindings-llvm.org-main"
         )
     }
 }
@@ -154,6 +186,36 @@ enum Sema {
             name: "SemaTests",
             dependencies: [
                 Sema.dependency
+            ],
+            resources: [.copy("Resources")]
+        )
+    }
+}
+
+enum CodeGen {
+    static let dependency: Target.Dependency = "CodeGen"
+    static var product: Product {
+        .library(name: "CodeGen", targets: ["CodeGen"])
+    }
+    static var target: Target {
+        .target(
+            name: "CodeGen",
+            dependencies: [
+                AST.dependency,
+                Basic.dependency,
+                Diagnostics.dependency,
+                Sema.dependency
+            ]
+        )
+    }
+    static var tests: Target {
+        .testTarget(
+            name: "CodeGenTests",
+            dependencies: [
+                CodeGen.dependency,
+                Sema.dependency,
+                Parser.dependency,
+                Lexer.dependency
             ],
             resources: [.copy("Resources")]
         )
