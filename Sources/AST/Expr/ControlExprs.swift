@@ -70,7 +70,7 @@ public struct WhileExpr: Expr {
 }
 
 public struct CaseExpr: Expr {
-    public let expr: any Expr
+    public let expression: any Expr
     public let branches: [CaseBranch]
     public let location: SourceLocation
     
@@ -78,18 +78,18 @@ public struct CaseExpr: Expr {
         let branchesDescription = branches.map({"    " + $0.description})
             .joined(separator: ";\n")
         return """
-        case \(expr.description) of
+        case \(expression.description) of
         \(branchesDescription)
         esac
         """
     }
     
     public init(
-        expr: some Expr,
+        expression: some Expr,
         branches: [CaseBranch],
         location: SourceLocation
     ) {
-        self.expr = expr
+        self.expression = expression
         self.branches = branches
         self.location = location
     }

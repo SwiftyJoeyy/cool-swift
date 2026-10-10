@@ -107,7 +107,7 @@ import Lexer
         let expr = try parse("case x of y : Int => 1; esac")
         
         let caseExpr = try #require(expr as? CaseExpr)
-        #expect(caseExpr.expr.description == "x")
+        #expect(caseExpr.expression.description == "x")
         try #require(caseExpr.branches.count == 1)
         
         let branch = caseExpr.branches[0]
@@ -129,7 +129,7 @@ import Lexer
         """)
         
         let caseExpr = try #require(expr as? CaseExpr)
-        #expect(caseExpr.expr.description == "x")
+        #expect(caseExpr.expression.description == "x")
         try #require(caseExpr.branches.count == 2)
         
         for i in 0..<expectedBranches.count {
@@ -150,8 +150,8 @@ import Lexer
         
         let caseExpr = try #require(expr as? CaseExpr)
         
-        #expect(caseExpr.expr is OperationExpr)
-        #expect(caseExpr.expr.description == "x + 1")
+        #expect(caseExpr.expression is OperationExpr)
+        #expect(caseExpr.expression.description == "x + 1")
         try #require(caseExpr.branches.count == 1)
         
         let branch = caseExpr.branches[0]
@@ -186,6 +186,19 @@ import Lexer
             _ = try parse("case x of y : Int => 1;")
         }
         #expect(error?.id == ParserError.expectedKeyword(.esac).id)
+    }
+    
+    @Test func `reports error on missing colon in case`() throws {
+        let (_, diags) = try parseWithDiags("case x of y  Int => 1; esac")
+        let expectedDiagID = ParserError.expectedSymbol(.colon).id
+        #expect(diags.map(\.id) == [expectedDiagID])
+    }
+    
+    @Test func `reports error when case doesn't have a valid type`() throws {
+        let error = #expect(throws: Diagnostic.self) {
+            _ = try parse("case x of y : 1 => 1; esac")
+        }
+        #expect(error?.id == ParserError.expectedTypeAnnotation.id)
     }
     
 // MARK: - If Expression Tests

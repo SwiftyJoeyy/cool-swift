@@ -151,7 +151,7 @@ extension ExprParser {
         let caseToken = parser.currentToken
         try parser.advance()
         
-        let expr = try parse(from: &parser)
+        let expression = try parse(from: &parser)
         if try parser.advance().kind != .keyword(.of) {
             throw ParserError.expectedKeyword(.of)
                 .diagnostic(at: parser.currentToken.location)
@@ -196,7 +196,7 @@ extension ExprParser {
         }
         
         return CaseExpr(
-            expr: expr,
+            expression: expression,
             branches: branches,
             location: caseToken.location
         )
