@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Diagnostics
+public import Diagnostics
 
 public enum LexerError {
     case unescapedNewline

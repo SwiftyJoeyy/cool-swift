@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Basic
+public import Basic
 
 public struct IfExpr: Expr {
     public let condition: any Expr

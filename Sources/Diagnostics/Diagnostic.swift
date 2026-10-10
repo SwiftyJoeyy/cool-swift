@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Basic
+public import Basic
 
 public struct Diagnostic: Error {
     public let id: String

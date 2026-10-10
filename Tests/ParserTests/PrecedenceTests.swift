@@ -14,7 +14,7 @@ import Lexer
 
 @Suite struct PrecedenceTests: ParserTestSuite {
 // MARK: - Functions
-    func parseNode(from parser: inout CoolParser) throws(Diagnostic) -> Expr {
+    func parseNode(from parser: inout CoolParser) throws(Diagnostic) -> any Expr {
         return try ExprParser.parse(from: &parser)
     }
     

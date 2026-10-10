@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Basic
+public import Basic
 
 public struct MemberAccessExpr: Expr {
     public let base: any Expr

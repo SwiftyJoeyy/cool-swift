@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Basic
+public import Basic
 
 public struct FuncCallExpr: Expr {
     public let calledExpression: any Expr

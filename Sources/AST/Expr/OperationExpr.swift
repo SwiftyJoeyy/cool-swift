@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Basic
+public import Basic
 
 public struct BinaryOperator: ASTNode {
     public let op: Operator

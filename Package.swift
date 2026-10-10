@@ -1,6 +1,12 @@
-// swift-tools-version: 6.2
+// swift-tools-version: 6.4
 
 import PackageDescription
+
+let upcomingFeatures: [SwiftSetting] = [
+    .enableUpcomingFeature("MemberImportVisibility"),
+    .enableUpcomingFeature("ExistentialAny"),
+    .enableUpcomingFeature("InternalImportsByDefault")
+]
 
 let package = Package(
     name: "CoolSwift",
@@ -42,7 +48,8 @@ let package = Package(
                 Sema.dependency,
                 Parser.dependency
             ],
-            resources: [.copy("Resources")]
+            resources: [.copy("Resources")],
+            swiftSettings: upcomingFeatures
         ),
     ]
 )
@@ -60,7 +67,6 @@ enum ArgumentParser {
         )
     }
 }
-
 
 enum LLVMBindings {
     static var swiftSettings: [SwiftSetting]? {
@@ -96,7 +102,11 @@ enum AST {
         .library(name: "AST", targets: ["AST"])
     }
     static var target: Target {
-        .target(name: "AST", dependencies: [Basic.dependency])
+        .target(
+            name: "AST",
+            dependencies: [Basic.dependency],
+            swiftSettings: upcomingFeatures
+        )
     }
 }
 
@@ -106,7 +116,7 @@ enum Basic {
         .library(name: "Basic", targets: ["Basic"])
     }
     static var target: Target {
-        Target.target(name: "Basic")
+        Target.target(name: "Basic", swiftSettings: upcomingFeatures)
     }
 }
 
@@ -116,7 +126,11 @@ enum Diagnostics {
         .library(name: "Diagnostics", targets: ["Diagnostics"])
     }
     static var target: Target {
-        .target(name: "Diagnostics", dependencies: [Basic.dependency])
+        .target(
+            name: "Diagnostics",
+            dependencies: [Basic.dependency],
+            swiftSettings: upcomingFeatures
+        )
     }
 }
 
@@ -128,14 +142,16 @@ enum Lexer {
     static var target: Target {
         .target(
             name: "Lexer",
-            dependencies: [Basic.dependency, Diagnostics.dependency]
+            dependencies: [Basic.dependency, Diagnostics.dependency],
+            swiftSettings: upcomingFeatures
         )
     }
     static var tests: Target {
         .testTarget(
             name: "LexerTests",
             dependencies: [Lexer.dependency],
-            resources: [.copy("IntegrationTests/Resources")]
+            resources: [.copy("IntegrationTests/Resources")],
+            swiftSettings: upcomingFeatures
         )
     }
 }
@@ -153,7 +169,8 @@ enum Parser {
                 Basic.dependency,
                 Diagnostics.dependency,
                 Lexer.dependency
-            ]
+            ],
+            swiftSettings: upcomingFeatures
         )
     }
     static var tests: Target {
@@ -163,7 +180,8 @@ enum Parser {
                 Parser.dependency,
                 TestSupport.dependency
             ],
-            resources: [.copy("IntegrationTests/Resources")]
+            resources: [.copy("IntegrationTests/Resources")],
+            swiftSettings: upcomingFeatures
         )
     }
 }
@@ -181,7 +199,8 @@ enum Sema {
                 Basic.dependency,
                 Diagnostics.dependency,
                 Parser.dependency
-            ]
+            ],
+            swiftSettings: upcomingFeatures
         )
     }
     static var tests: Target {
@@ -191,7 +210,8 @@ enum Sema {
                 Sema.dependency,
                 TestSupport.dependency
             ],
-            resources: [.copy("Resources")]
+            resources: [.copy("Resources")],
+            swiftSettings: upcomingFeatures
         )
     }
 }

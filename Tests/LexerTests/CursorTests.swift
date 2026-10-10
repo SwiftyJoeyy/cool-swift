@@ -6,6 +6,7 @@
 //
 
 import Testing
+import Basic
 @testable import Lexer
 
 @Suite struct CursorTests {

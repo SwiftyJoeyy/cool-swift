@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Basic
+public import Basic
 
 public struct SelfDecl: BindingDecl {
     public let name: Identifier

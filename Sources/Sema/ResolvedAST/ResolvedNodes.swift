@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import AST
+public import AST
 
 public protocol ResolvedExpr {
     var type: ResolvedType { get }

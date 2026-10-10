@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Basic
+public import Basic
 
 public protocol DiagnosticsEngine {
     func insert(_ diagnostic: Diagnostic)
@@ -15,7 +15,7 @@ public protocol DiagnosticsEngine {
 
 extension DiagnosticsEngine {
     public func insert(
-        _ diagnostic: DiagnosticConvertible,
+        _ diagnostic: any DiagnosticConvertible,
         at location: SourceLocation? = nil
     ) {
         insert(Diagnostic(diagnostic, location: location))
@@ -23,10 +23,10 @@ extension DiagnosticsEngine {
 }
 
 public class CoolDiagnosticsEngine: DiagnosticsEngine {
-    private let sourceManager: SourceManageable
+    private let sourceManager: any SourceManageable
     private var diagnostics = [Diagnostic]()
     
-    public init(sourceManager: some SourceManageable) {
+    public init(sourceManager: any SourceManageable) {
         self.sourceManager = sourceManager
     }
     

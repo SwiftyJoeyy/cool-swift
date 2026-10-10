@@ -11,7 +11,7 @@ import Diagnostics
 
 struct ExprTypeVisitor: ExprVisitor {
     typealias Diag = Diagnostic
-    let typeSystem: TypeSystem
+    let typeSystem: any TypeSystem
     let scope: any Scope
     private(set) var resolvedExpr: any ResolvedExpr?
     
@@ -52,7 +52,7 @@ struct ExprTypeVisitor: ExprVisitor {
     mutating func visit(_ expr: FuncCallExpr) throws(Diag) {
         let (base, member, refExpr) = try declMember(from: expr.calledExpression)
         guard case .localDecl(let symbolMember) = member.refType,
-              let funcDecl = symbolMember.decl.kind.decl as? MethodDecl
+              let funcDecl = symbolMember.decl.kind.decl as? (any MethodDecl)
         else {
             throw SemaError.cannotCallNonFunction(refExpr.name)
                 .diagnostic(at: refExpr.location)

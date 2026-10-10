@@ -14,7 +14,7 @@ import Lexer
 extension ExprParser {
     static func parsePrefix(
         from parser: inout CoolParser
-    ) throws(Diagnostic) -> Expr {
+    ) throws(Diagnostic) -> any Expr {
         let token = parser.currentToken
         switch token.kind {
             case .keyword(.if):
@@ -270,7 +270,7 @@ extension ExprParser {
     ) throws(Diagnostic) -> BlockExpr {
         let braceToken = parser.currentToken
         try parser.advance()
-        var expressions = [Expr]()
+        var expressions = [any Expr]()
         
         do throws(Diagnostic) {
             while !parser.at(.rightBrace) {

@@ -6,13 +6,13 @@
 //
 
 import Foundation
-import AST
+public import AST
 import Basic
-import Diagnostics
-import Lexer
+public import Diagnostics
+public import Lexer
 
 public struct CoolParser {
-    private let diagnostics: DiagnosticsEngine
+    private let diagnostics: any DiagnosticsEngine
     
     private(set) var currentToken: Token
     private var lexemes: Lexemes

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Basic
+public import Basic
 
 public struct VarDecl: BindingDecl {
     public let name: Identifier

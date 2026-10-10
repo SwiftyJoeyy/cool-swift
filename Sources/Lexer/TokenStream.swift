@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Diagnostics
+public import Diagnostics
 
 public struct Lexemes {
     private var lexer: CoolLexer

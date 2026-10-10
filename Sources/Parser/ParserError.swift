@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import Diagnostics
-import Lexer
+public import Diagnostics
+public import Lexer
 
 public enum ParserError {
 // MARK: - ClassDecl

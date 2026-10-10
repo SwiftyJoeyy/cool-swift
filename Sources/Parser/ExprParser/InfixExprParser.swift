@@ -14,9 +14,9 @@ import Lexer
 extension ExprParser {
     static func parseInfix(
         from parser: inout CoolParser,
-        left: Expr,
+        left: any Expr,
         precedence: Precedence
-    ) throws(Diagnostic) -> Expr {
+    ) throws(Diagnostic) -> any Expr {
         let opToken = parser.currentToken
         
         switch opToken.kind {
@@ -108,12 +108,12 @@ extension ExprParser {
     
     private static func parseFuncCallArgs(
         from parser: inout CoolParser
-    ) throws(Diagnostic) -> [Expr] {
+    ) throws(Diagnostic) -> [any Expr] {
         if parser.at(.rightParen) {
             return []
         }
         
-        var args = [Expr]()
+        var args = [any Expr]()
         args.append(try parse(from: &parser))
         try parser.advance()
         while parser.at(.comma) {

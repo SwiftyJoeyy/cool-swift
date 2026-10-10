@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Diagnostics
+public import Diagnostics
 
 protocol TokenLexer {
     static func matches(_ char: UInt8) -> Bool
@@ -106,7 +106,7 @@ extension CoolLexer {
             self.lexer = (repeat each lexer)
         }
         
-        func lexer(_ char: UInt8) -> TokenLexer.Type? {
+        func lexer(_ char: UInt8) -> any TokenLexer.Type? {
             for item in repeat each lexer {
                 if item.matches(char) {
                     return item

@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import AST
-import Diagnostics
+public import AST
+public import Diagnostics
 
 public enum SemaError {
     case duplicateClass(String)

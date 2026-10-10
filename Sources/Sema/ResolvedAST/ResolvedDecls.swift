@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import AST
+public import AST
 
 public struct ResolvedClassDecl: ResolvedDecl {
     public let name: String

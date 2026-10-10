@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import AST
+public import AST
 
 public struct ResolvedIfExpr: ResolvedExpr {
     public let type: ResolvedType

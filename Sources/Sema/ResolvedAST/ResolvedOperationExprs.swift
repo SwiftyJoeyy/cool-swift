@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import AST
+public import AST
 
 public enum ResolvedBinaryOperator {
     case lessThan, lessThanOrEqual, plus, minus, slash, star, equal

@@ -67,8 +67,8 @@ final class ClassSymbol {
     }
 }
 
-public struct SymbolMember {
-    public let decl: MemberDecl
-    public let parent: ResolvedType
-    public let index: Int
+struct SymbolMember {
+    let decl: MemberDecl
+    let parent: ResolvedType
+    let index: Int
 }

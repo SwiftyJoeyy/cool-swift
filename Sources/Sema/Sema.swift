@@ -6,16 +6,16 @@
 //
 
 import Foundation
-import AST
+public import AST
 import Basic
-import Diagnostics
+public import Diagnostics
 
 public struct Sema {
-    private let diagnostics: DiagnosticsEngine
+    private let diagnostics: any DiagnosticsEngine
     private let interfaceSymbols: ModuleInterfaceSymbols
     
     public init(
-        diagnostics: DiagnosticsEngine,
+        diagnostics: any DiagnosticsEngine,
         interfaceSymbols: ModuleInterfaceSymbols
     ) {
         self.diagnostics = diagnostics

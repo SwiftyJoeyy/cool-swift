@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Basic
+public import Basic
 
 public protocol DiagnosticConvertible {
     var id: String { get }

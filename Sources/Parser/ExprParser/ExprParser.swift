@@ -15,7 +15,7 @@ struct ExprParser {
     static func parse(
         from parser: inout CoolParser,
         minPrecedence: Precedence = .none
-    ) throws(Diagnostic) -> Expr {
+    ) throws(Diagnostic) -> any Expr {
         var left = try parsePrefix(from: &parser)
         
         while let precedence = (try parser.advance(if: {$0.precedence != nil && $0.precedence! >= minPrecedence}))?.precedence {

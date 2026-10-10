@@ -6,9 +6,9 @@
 //
 
 import Foundation
-import AST
+public import AST
 import Basic
-import Diagnostics
+public import Diagnostics
 
 public class ModuleInterfaceSymbols {
     private(set) var symbols = [ResolvedType: ClassSymbol]()
