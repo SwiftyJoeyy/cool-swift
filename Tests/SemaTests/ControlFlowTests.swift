@@ -15,14 +15,6 @@ import Parser
 @testable import Sema
 
 @Suite struct ControlFlowTests {
-// MARK: - Functions
-    private func analyze(_ source: String) throws {
-        var (parser, diagEngine) = try CoolParser.new(source: source)
-        let sourceFile = try parser.parse()
-        let sema = Sema(diagnostics: diagEngine, interfaceSymbols: .test)
-        try sema.analyze(sourceFile)
-    }
-    
 // MARK: - If Expression Tests
     @Test func `validates if with matching branch types`() throws {
         let source = """

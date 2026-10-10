@@ -15,14 +15,6 @@ import Parser
 @testable import Sema
 
 @Suite struct MemberAccessTests {
-// MARK: - Functions
-    private func analyze(_ source: String) throws {
-        var (parser, diagEngine) = try CoolParser.new(source: source)
-        let sourceFile = try parser.parse()
-        let sema = Sema(diagnostics: diagEngine, interfaceSymbols: .test)
-        try sema.analyze(sourceFile)
-    }
-    
 // MARK: - Property Access Tests
     @Test func `validates member access on object`() throws {
         let source = """

@@ -15,15 +15,6 @@ import Parser
 @testable import Sema
 
 @Suite struct ClassesValidatorTests {
-// MARK: - Functions
-    @discardableResult
-    private func validate(_ source: String) throws -> SymbolTable {
-        var (parser, _) = try CoolParser.new(source: source)
-        let sourceFile = try parser.parse()
-        return try SymbolTableBuilder(interfaceSymbols: .test)
-            .build(from: sourceFile.declarations)
-    }
-    
 // MARK: - Duplicate Class Tests
     @Test func `detects duplicate class declarations`() throws {
         let source = """
@@ -32,7 +23,7 @@ import Parser
         """
         
         let error = #expect(throws: Diagnostic.self) {
-            try validate(source)
+            try build(source)
         }
         #expect(error?.message == "duplicate class 'Main'")
     }
@@ -44,7 +35,7 @@ import Parser
         class Bar { };
         """
         
-        let table = try validate(source)
+        let table = try build(source)
         
         #expect(table.classNames == ["Main", "Foo", "Bar"])
     }
@@ -56,7 +47,7 @@ import Parser
         """
         
         let error = #expect(throws: Diagnostic.self) {
-            try validate(source)
+            try build(source)
         }
         #expect(error?.message == "parent class 'Foo' is not defined")
     }
@@ -67,7 +58,7 @@ import Parser
         """
         
         let error = #expect(throws: Diagnostic.self) {
-            try validate(source)
+            try build(source)
         }
         #expect(error?.message == "class 'Main' inherits from itself")
     }
@@ -79,7 +70,7 @@ import Parser
         """
         
         let error = #expect(throws: Diagnostic.self) {
-            try validate(source)
+            try build(source)
         }
         #expect(error?.message == "class 'B' inherits from itself")
     }
@@ -92,7 +83,7 @@ import Parser
         """
         
         let error = #expect(throws: Diagnostic.self) {
-            try validate(source)
+            try build(source)
         }
         #expect(error?.message == "class 'C' inherits from itself")
     }
@@ -107,7 +98,7 @@ import Parser
         """
         
         let error = #expect(throws: Diagnostic.self) {
-            try validate(source)
+            try build(source)
         }
         #expect(error?.message == "class 'E' inherits from itself")
     }
@@ -120,7 +111,7 @@ import Parser
         class Derived inherits Middle { };
         """
         
-        let table = try validate(source)
+        let table = try build(source)
         
         for item in table.symbols {
             let inheritance = expectedClasses[item.decl.name.value]
@@ -138,7 +129,7 @@ import Parser
         """
         
         let error = #expect(throws: Diagnostic.self) {
-            try validate(source)
+            try build(source)
         }
         #expect(error?.message == "invalid redeclaration of 'foo'")
     }
@@ -152,7 +143,7 @@ import Parser
         """
         
         let error = #expect(throws: Diagnostic.self) {
-            try validate(source)
+            try build(source)
         }
         #expect(error?.message == "invalid redeclaration of 'x'")
     }
@@ -166,7 +157,7 @@ import Parser
         """
         
         let error = #expect(throws: Diagnostic.self) {
-            try validate(source)
+            try build(source)
         }
         #expect(error?.message == "invalid redeclaration of 'foo'")
     }
@@ -181,7 +172,7 @@ import Parser
         };
         """
         
-        let table = try validate(source)
+        let table = try build(source)
         
         for item in table.symbols {
             let identifier = "foo"
@@ -200,7 +191,7 @@ import Parser
         """
         
         let error = #expect(throws: Diagnostic.self) {
-            try validate(source)
+            try build(source)
         }
         #expect(error?.message == "overriding a property is not allowed: 'x'")
     }
@@ -220,7 +211,7 @@ import Parser
         };
         """
         
-        let table = try validate(source)
+        let table = try build(source)
         for item in table.symbols {
             #expect(item.memberNames == expectedClasses[item.decl.name.value])
         }
@@ -241,7 +232,7 @@ import Parser
         };
         """
         
-        let table = try validate(source)
+        let table = try build(source)
         for item in table.symbols {
             #expect(item.memberNames == expectedClasses[item.decl.name.value])
         }
@@ -270,9 +261,9 @@ import Parser
         };
         """
         
-        try validate(source)
+        try build(source)
         
-        let table = try validate(source)
+        let table = try build(source)
         for item in table.symbols {
             let expectedClass = expectedClasses[item.decl.name.value]
             #expect(item.superclass?.decl.name.value == expectedClass?.0)
@@ -293,7 +284,7 @@ import Parser
         };
         """
         
-        let table = try validate(source)
+        let table = try build(source)
         
         for item in table.symbols {
             let identifier = "foo"

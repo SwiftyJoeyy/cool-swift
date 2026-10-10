@@ -15,14 +15,6 @@ import Parser
 @testable import Sema
 
 @Suite struct VarDeclSemaTests {
-// MARK: - Helper Functions
-    private func analyze(_ source: String) throws {
-        var (parser, diagEngine) = try CoolParser.new(source: source)
-        let sourceFile = try parser.parse()
-        let sema = Sema(diagnostics: diagEngine, interfaceSymbols: .test)
-        try sema.analyze(sourceFile)
-    }
-    
 // MARK: - Valid Variable Declarations
     @Test func `validates variable with matching type initializer`() throws {
         let source = """

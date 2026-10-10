@@ -20,14 +20,8 @@ import Parser
         subdirectory: "Resources"
     ) ?? [])
     func `validate files`(fileURL: URL) throws {
-        let source = try String(contentsOf: fileURL)
-        var (parser, diagEngine) = try CoolParser.new(
-            source: source,
-            file: fileURL.lastPathComponent
-        )
-        let sourceFile = try parser.parse()
-        let sema = Sema(diagnostics: diagEngine, interfaceSymbols: .test)
-        try sema.analyze(sourceFile)
-        #expect(diagEngine.diags.isEmpty)
+        let source = try String(contentsOf: fileURL, encoding: .utf8)
+        let diags = try analyze(source, file: fileURL.lastPathComponent)
+        #expect(diags.isEmpty)
     }
 }

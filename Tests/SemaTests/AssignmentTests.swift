@@ -15,14 +15,6 @@ import Parser
 @testable import Sema
 
 @Suite struct AssignmentTests {
-// MARK: - Functions
-    private func analyze(_ source: String) throws {
-        var (parser, diagEngine) = try CoolParser.new(source: source)
-        let sourceFile = try parser.parse()
-        let sema = Sema(diagnostics: diagEngine, interfaceSymbols: .test)
-        try sema.analyze(sourceFile)
-    }
-    
 // MARK: - Basic Assignment Tests
     @Test func `validates assignment to parameter`() throws {
         let source = """
