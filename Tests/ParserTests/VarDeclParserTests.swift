@@ -13,17 +13,10 @@ import Diagnostics
 import Lexer
 @testable import Parser
 
-@Suite struct VarDeclParserTests {
+@Suite struct VarDeclParserTests: ParserTestSuite {
 // MARK: - Functions
-    private func parse(_ source: String) throws -> VarDecl {
-        var parser = try CoolParser.new(source: source).parser
+    func parseNode(from parser: inout CoolParser) throws(Diagnostic) -> VarDecl {
         return try VarDeclParser.parse(from: &parser)
-    }
-    private func parseWithDiags(
-        _ source: String
-    ) throws -> (decl: VarDecl, diags: [Diagnostic]) {
-        var (parser, diagEngine) = try CoolParser.new(source: source)
-        return (try VarDeclParser.parse(from: &parser), diagEngine.diags)
     }
     
 // MARK: - Basic Variable Declaration Tests

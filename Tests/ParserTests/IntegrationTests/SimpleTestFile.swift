@@ -29,7 +29,7 @@ enum SimpleTestFile: TestFile {
         try #require(members.count == 2)
         
         // Validate property 'x : Int <- 42'
-        let xProperty = try #require(members[0] as? VarDecl)
+        let xProperty = try #require(members[0].kind.decl as? VarDecl)
         #expect(xProperty.name.value == "x")
         #expect(xProperty.typeAnnotation.type.description == "Int")
         #expect(xProperty.initializer != nil)
@@ -38,7 +38,7 @@ enum SimpleTestFile: TestFile {
         #expect(initializer.value == "42")
         
         // Validate method 'main() : Int'
-        let mainMethod = try #require(members[1] as? FuncDecl)
+        let mainMethod = try #require(members[1].kind.decl as? FuncDecl)
         #expect(mainMethod.name.value == "main")
         #expect(mainMethod.parameters.parameters.isEmpty)
         #expect(mainMethod.returnClause.type.description == "Int")

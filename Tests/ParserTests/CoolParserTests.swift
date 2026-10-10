@@ -13,10 +13,9 @@ import Diagnostics
 import Lexer
 @testable import Parser
 
-@Suite struct CoolParserTests {
-    private func parseWithDiags(_ source: String) throws -> (SourceFile, [Diagnostic]) {
-        var (parser, diagEngine) = try CoolParser.new(source: source)
-        return (try parser.parse(), diagEngine.diags)
+@Suite struct CoolParserTests: ParserTestSuite {
+    func parseNode(from parser: inout CoolParser) throws(Diagnostic) -> SourceFile {
+        return try parser.parse()
     }
     
     @Test func `reports error for top level code outside class`() throws {

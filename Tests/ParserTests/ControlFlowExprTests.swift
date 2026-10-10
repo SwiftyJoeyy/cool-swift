@@ -13,17 +13,10 @@ import Diagnostics
 import Lexer
 @testable import Parser
 
-@Suite struct ControlFlowExprTests {
+@Suite struct ControlFlowExprTests: ParserTestSuite {
 // MARK: - Functions
-    private func parse(_ source: String) throws -> Expr {
-        var parser = try CoolParser.new(source: source).parser
+    func parseNode(from parser: inout CoolParser) throws(Diagnostic) -> Expr {
         return try ExprParser.parse(from: &parser)
-    }
-    private func parseWithDiags(
-        _ source: String
-    ) throws -> (expr: Expr, diags: [Diagnostic]) {
-        var (parser, diagEngine) = try CoolParser.new(source: source)
-        return (try ExprParser.parse(from: &parser), diagEngine.diags)
     }
     
 // MARK: - Let Expression Tests

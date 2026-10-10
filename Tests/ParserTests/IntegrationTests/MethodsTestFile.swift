@@ -25,7 +25,7 @@ enum MethodsTestFile: TestFile {
         #expect(classDecl.name.value == "Calculator")
         #expect(classDecl.inheritance == nil)
         
-        let methods = classDecl.membersBlock.members.compactMap { $0 as? FuncDecl }
+        let methods = classDecl.membersBlock.members.compactMap { $0.kind.decl as? FuncDecl }
         try #require(methods.count == 7)
         
         try validateResetMethod(method: methods[0])

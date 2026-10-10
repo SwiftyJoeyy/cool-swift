@@ -13,20 +13,11 @@ import Diagnostics
 import Lexer
 @testable import Parser
 
-@Suite struct ClassDeclParserTests {
+@Suite struct ClassDeclParserTests: ParserTestSuite {
 // MARK: - Functions
-    private func parse(_ source: String) throws -> ClassDecl {
-        var parser = try CoolParser.new(source: source).parser
+    func parseNode(from parser: inout CoolParser) throws(Diagnostic) -> ClassDecl {
         return try ClassDeclParser(memberParser: DefaultMemberDeclParser())
             .parse(from: &parser)
-    }
-    private func parseWithDiags(
-        _ source: String
-    ) throws -> (decl: ClassDecl, diags: [Diagnostic]) {
-        var (parser, diagEngine) = try CoolParser.new(source: source)
-        let classDecl = try ClassDeclParser(memberParser: DefaultMemberDeclParser())
-            .parse(from: &parser)
-        return (classDecl, diagEngine.diags)
     }
     
 // MARK: - Basic Class Declaration Tests
@@ -60,7 +51,7 @@ import Lexer
             let classDecl = try parse(source)
             
             try #require(classDecl.membersBlock.members.count == 1)
-            let varDecl = try #require(classDecl.membersBlock.members[0] as? VarDecl)
+            let varDecl = try #require(classDecl.membersBlock.members[0].kind.decl as? VarDecl)
             
             #expect(varDecl.name.value == "x")
             #expect(varDecl.typeAnnotation.type.description == "Int")
@@ -76,7 +67,7 @@ import Lexer
             let classDecl = try parse(source)
             
             try #require(classDecl.membersBlock.members.count == 1)
-            let varDecl = try #require(classDecl.membersBlock.members[0] as? VarDecl)
+            let varDecl = try #require(classDecl.membersBlock.members[0].kind.decl as? VarDecl)
             
             #expect(varDecl.name.value == "x")
             #expect(varDecl.initializer != nil)
@@ -93,7 +84,7 @@ import Lexer
         """
         let classDecl = try parse(source)
         
-        let members = classDecl.membersBlock.members.compactMap({$0 as? VarDecl})
+        let members = classDecl.membersBlock.members.compactMap({$0.kind.decl as? VarDecl})
         try #require(members.count == 3)
         #expect(members.map(\.name.value) == ["x", "y", "z"])
         
@@ -109,7 +100,7 @@ import Lexer
         """
         let classDecl = try parse(source)
         
-        let members = classDecl.membersBlock.members.compactMap({$0 as? FuncDecl})
+        let members = classDecl.membersBlock.members.compactMap({$0.kind.decl as? FuncDecl})
         try #require(members.count == 1)
         #expect(members[0].name.value == "main")
     }
@@ -124,7 +115,7 @@ import Lexer
         """
         let classDecl = try parse(source)
         
-        let members = classDecl.membersBlock.members.compactMap({$0 as? FuncDecl})
+        let members = classDecl.membersBlock.members.compactMap({$0.kind.decl as? FuncDecl})
         try #require(members.count == 3)
         #expect(members.map(\.name.value) == ["main", "main2", "main3"])
     }
@@ -142,10 +133,10 @@ import Lexer
         
         let members = classDecl.membersBlock.members
         try #require(members.count == 4)
-        #expect(members[0] is VarDecl)
-        #expect(members[1] is FuncDecl)
-        #expect(members[2] is VarDecl)
-        #expect(members[3] is FuncDecl)
+        #expect(members[0].kind.decl is VarDecl)
+        #expect(members[1].kind.decl is FuncDecl)
+        #expect(members[2].kind.decl is VarDecl)
+        #expect(members[3].kind.decl is FuncDecl)
     }
     
 // MARK: - Error Cases
@@ -212,8 +203,8 @@ import Lexer
         
         let members = classDecl.membersBlock.members
         try #require(members.count == 2)
-        #expect(members[0] is VarDecl)
-        #expect(members[1] is FuncDecl)
+        #expect(members[0].kind.decl is VarDecl)
+        #expect(members[1].kind.decl is FuncDecl)
         
         try #require(diags.count == 2)
         

@@ -13,17 +13,10 @@ import Diagnostics
 import Lexer
 @testable import Parser
 
-@Suite struct InterfaceFuncDeclParserTests {
+@Suite struct InterfaceFuncDeclParserTests: ParserTestSuite {
 // MARK: - Functions
-    private func parse(_ source: String) throws -> InterfaceFuncDecl {
-        var parser = try CoolParser.new(source: source).parser
+    func parseNode(from parser: inout CoolParser) throws(Diagnostic) -> InterfaceFuncDecl {
         return try InterfaceFuncDeclParser.parse(from: &parser)
-    }
-    private func parseWithDiags(
-        _ source: String
-    ) throws -> (decl: InterfaceFuncDecl, diags: [Diagnostic]) {
-        var (parser, diagEngine) = try CoolParser.new(source: source)
-        return (try InterfaceFuncDeclParser.parse(from: &parser), diagEngine.diags)
     }
     
 // MARK: - Tests
@@ -146,17 +139,10 @@ import Lexer
     }
 }
 
-@Suite struct InterfaceVarDeclParserTests {
+@Suite struct InterfaceVarDeclParserTests: ParserTestSuite {
 // MARK: - Functions
-    private func parse(_ source: String) throws -> InterfaceVarDecl {
-        var parser = try CoolParser.new(source: source).parser
+    func parseNode(from parser: inout CoolParser) throws(Diagnostic) -> InterfaceVarDecl {
         return try InterfaceVarDeclParser.parse(from: &parser)
-    }
-    private func parseWithDiags(
-        _ source: String
-    ) throws -> (decl: InterfaceVarDecl, diags: [Diagnostic]) {
-        var (parser, diagEngine) = try CoolParser.new(source: source)
-        return (try InterfaceVarDeclParser.parse(from: &parser), diagEngine.diags)
     }
     
 // MARK: - Basic Interface Variable Declaration Tests

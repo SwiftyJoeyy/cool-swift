@@ -32,25 +32,25 @@ enum ComprehensiveTestFile: TestFile {
         try #require(members.count == 4)
         
         
-        let itemVar = try #require(members[0] as? VarDecl)
+        let itemVar = try #require(members[0].kind.decl as? VarDecl)
         #expect(itemVar.name.value == "item")
         #expect(itemVar.typeAnnotation.type.description == "String")
         #expect(itemVar.initializer == nil)
         
-        let nextVar = try #require(members[1] as? VarDecl)
+        let nextVar = try #require(members[1].kind.decl as? VarDecl)
         #expect(nextVar.name.value == "next")
         #expect(nextVar.typeAnnotation.type.description == "List")
         #expect(nextVar.initializer == nil)
         
         
-        let initFunc = try #require(members[2] as? FuncDecl)
+        let initFunc = try #require(members[2].kind.decl as? FuncDecl)
         #expect(initFunc.name.value == "init")
         #expect(initFunc.parameters.parameters.count == 2)
         #expect(initFunc.returnClause.type.description == "List")
         #expect((initFunc.body as? BlockExpr)?.expressions.count == 3)
         
         
-        let flattenFunc = try #require(members[3] as? FuncDecl)
+        let flattenFunc = try #require(members[3].kind.decl as? FuncDecl)
         #expect(flattenFunc.name.value == "flatten")
         #expect(flattenFunc.parameters.parameters.isEmpty)
         #expect(flattenFunc.returnClause.type.description == "String")
@@ -69,7 +69,7 @@ enum ComprehensiveTestFile: TestFile {
         try #require(members.count == 3)
         
         
-        let mainFunc = try #require(members[0] as? FuncDecl)
+        let mainFunc = try #require(members[0].kind.decl as? FuncDecl)
         #expect(mainFunc.name.value == "main")
         #expect(mainFunc.parameters.parameters.isEmpty)
         #expect(mainFunc.returnClause.type.description == "Object")
@@ -78,7 +78,7 @@ enum ComprehensiveTestFile: TestFile {
         try #require(mainLet.bindings.count == 3)
         
         
-        let testCaseFunc = try #require(members[1] as? FuncDecl)
+        let testCaseFunc = try #require(members[1].kind.decl as? FuncDecl)
         #expect(testCaseFunc.name.value == "testCase")
         #expect(testCaseFunc.parameters.parameters.count == 1)
         #expect(testCaseFunc.returnClause.type.description == "String")
@@ -96,7 +96,7 @@ enum ComprehensiveTestFile: TestFile {
         #expect(caseExpr.branches[2].binding.typeAnnotation.type.description == "Object")
         
         
-        let testDispatchFunc = try #require(members[2] as? FuncDecl)
+        let testDispatchFunc = try #require(members[2].kind.decl as? FuncDecl)
         #expect(testDispatchFunc.name.value == "testDispatch")
         #expect(testDispatchFunc.parameters.parameters.isEmpty)
         #expect(testDispatchFunc.returnClause.type.description == "Object")

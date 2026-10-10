@@ -13,10 +13,9 @@ import Diagnostics
 import Lexer
 @testable import Parser
 
-@Suite struct ExprParserTests {
+@Suite struct ExprParserTests: ParserTestSuite {
 // MARK: - Functions
-    private func parse(_ source: String) throws -> Expr {
-        var parser = try CoolParser.new(source: source).parser
+    func parseNode(from parser: inout CoolParser) throws(Diagnostic) -> Expr {
         return try ExprParser.parse(from: &parser)
     }
     

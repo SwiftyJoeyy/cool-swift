@@ -25,7 +25,7 @@ enum ExpressionsTestFile: TestFile {
         #expect(classDecl.name.value == "ExprTest")
         #expect(classDecl.inheritance == nil)
         
-        let methods = classDecl.membersBlock.members.compactMap { $0 as? FuncDecl }
+        let methods = classDecl.membersBlock.members.compactMap { $0.kind.decl as? FuncDecl }
         try #require(methods.count == 5)
         
         try validateComputeMethod(method: methods[0])

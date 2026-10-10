@@ -8,19 +8,19 @@
 import Testing
 import Foundation
 import AST
+import Diagnostics
 import Lexer
 @testable import Parser
 
-@Suite struct PrecedenceTests {
+@Suite struct PrecedenceTests: ParserTestSuite {
 // MARK: - Functions
-    private func parseExpr(_ source: String) throws -> Expr {
-        var parser = try CoolParser.new(source: source).parser
+    func parseNode(from parser: inout CoolParser) throws(Diagnostic) -> Expr {
         return try ExprParser.parse(from: &parser)
     }
     
 // MARK: - Arithmetic Precedence Tests
     @Test func `multiplication has higher precedence than addition`() throws {
-        let expr = try parseExpr("1 + 2 * 3")
+        let expr = try parse("1 + 2 * 3")
         
         let addExpr = try #require(expr as? OperationExpr)
         
@@ -35,7 +35,7 @@ import Lexer
     }
     
     @Test func `division has higher precedence than subtraction`() throws {
-        let expr = try parseExpr("10 - 6 / 2")
+        let expr = try parse("10 - 6 / 2")
         
         let subExpr = try #require(expr as? OperationExpr)
         #expect(subExpr.lhs.description == "10")
@@ -49,7 +49,7 @@ import Lexer
     }
     
     @Test func `left associativity of addition`() throws {
-        let expr = try parseExpr("1 + 2 + 3")
+        let expr = try parse("1 + 2 + 3")
         
         let addExpr = try #require(expr as? OperationExpr)
         
@@ -64,7 +64,7 @@ import Lexer
     }
     
     @Test func `left associativity of multiplication`() throws {
-        let expr = try parseExpr("2 * 3 * 4")
+        let expr = try parse("2 * 3 * 4")
         
         let mullExpr = try #require(expr as? OperationExpr)
         
@@ -80,7 +80,7 @@ import Lexer
     
 // MARK: - Comparison Precedence Tests
     @Test func `comparison has lower precedence than arithmetic`() throws {
-        let expr = try parseExpr("1 + 2 < 3 + 4")
+        let expr = try parse("1 + 2 < 3 + 4")
         
         let cmpExpr = try #require(expr as? OperationExpr)
         
@@ -99,7 +99,7 @@ import Lexer
     
 // MARK: - Assignment Precedence Tests
     @Test func `assignment has lowest precedence`() throws {
-        let expr = try parseExpr("x <- 1 + 2")
+        let expr = try parse("x <- 1 + 2")
         
         let assignExpr = try #require(expr as? AssignmentExpr)
         #expect(assignExpr.value is OperationExpr)
@@ -107,7 +107,7 @@ import Lexer
     
 // MARK: - Parentheses Override Tests
     @Test func `parentheses override multiplication precedence`() throws {
-        let expr = try parseExpr("(1 + 2) * 3")
+        let expr = try parse("(1 + 2) * 3")
         
         let mullExpr = try #require(expr as? OperationExpr)
         
@@ -122,7 +122,7 @@ import Lexer
     }
     
     @Test func `nested parentheses`() throws {
-        let expr = try parseExpr("((1 + 2) * 3) + 4")
+        let expr = try parse("((1 + 2) * 3) + 4")
         
         let outerAddExpr = try #require(expr as? OperationExpr)
         
@@ -142,14 +142,14 @@ import Lexer
     
 // MARK: - Unary Precedence Tests
     @Test func `not has high precedence`() throws {
-        let expr = try parseExpr("not true = false")
+        let expr = try parse("not true = false")
         
         let eqExpr = try #require(expr as? OperationExpr)
         #expect(eqExpr.lhs is NotExpr)
     }
     
     @Test func `isvoid has high precedence`() throws {
-        let expr = try parseExpr("isvoid x < y")
+        let expr = try parse("isvoid x < y")
         
         // Should parse as: (isvoid x) < y
         guard let cmpExpr = expr as? OperationExpr else {
@@ -162,7 +162,7 @@ import Lexer
     
 // MARK: - Complex Precedence Tests
     @Test func `complex expression with multiple precedence levels`() throws {
-        let expr = try parseExpr("x <- a + b * c < d")
+        let expr = try parse("x <- a + b * c < d")
         
         let assignExpr = try #require(expr as? AssignmentExpr)
         #expect(assignExpr.target is DeclRefExpr)
@@ -184,7 +184,7 @@ import Lexer
     }
     
     @Test func `mixed arithmetic and comparison`() throws {
-        let expr = try parseExpr("1 + 2 * 3 < 4 + 5")
+        let expr = try parse("1 + 2 * 3 < 4 + 5")
         
         let cmpExpr = try #require(expr as? OperationExpr)
         
