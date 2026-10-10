@@ -14,7 +14,7 @@ extension UInt8 {
     /// 13
     internal static let carriageReturn = UInt8(ascii: "\r")
     
-    /// 10
+    /// 10 
     internal static let newline = UInt8(ascii: "\n")
     
     /// 92

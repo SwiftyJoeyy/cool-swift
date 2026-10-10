@@ -32,6 +32,23 @@ extension LexerError: DiagnosticConvertible {
     }
     
     public var message: String {
-        return "\(self)"
+        switch self {
+        case .unescapedNewline:
+            return "Unescaped newline in string literal"
+        case .stringTooLong:
+            return "String constant too long"
+        case .missingEndQuote:
+            return "Missing closing quote for string literal"
+        case .stringContainsNull:
+            return "String contains null character"
+        case .unterminatedComment:
+            return "Unterminated comment"
+        case .unexpectedCharacter:
+            return "Unexpected character"
+        case .invalidInteger:
+            return "Invalid integer literal"
+        case .invalidIdentifier:
+            return "Invalid identifier"
+        }
     }
 }
