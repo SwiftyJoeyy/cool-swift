@@ -7,7 +7,6 @@
 
 import Foundation
 import AST
-import Basic
 import Diagnostics
 
 protocol TypeSystem {

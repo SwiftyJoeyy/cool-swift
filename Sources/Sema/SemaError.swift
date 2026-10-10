@@ -5,9 +5,9 @@
 //  Created by Joe Maghzal on 20/12/2025.
 //
 
-import Foundation
 public import AST
 public import Diagnostics
+import Foundation
 
 public enum SemaError {
     case duplicateClass(String)

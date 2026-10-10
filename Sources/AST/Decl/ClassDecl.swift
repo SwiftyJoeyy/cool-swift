@@ -5,8 +5,8 @@
 //  Created by Joe Maghzal on 08/11/2025.
 //
 
-import Foundation
 public import Basic
+import Foundation
 
 public struct ClassDecl: Decl {
     public let name: Identifier

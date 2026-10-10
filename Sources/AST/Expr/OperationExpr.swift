@@ -5,8 +5,8 @@
 //  Created by Joe Maghzal on 20/11/2025.
 //
 
-import Foundation
 public import Basic
+import Foundation
 
 public struct BinaryOperator: ASTNode {
     public let op: Operator

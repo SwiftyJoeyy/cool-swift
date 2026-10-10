@@ -5,9 +5,8 @@
 //  Created by Joe Maghzal on 24/10/2025.
 //
 
-import Foundation
 public import Basic
-import Diagnostics
+import Foundation
 
 public struct Token: Equatable, Hashable, Sendable {
     public let kind: TokenKind

@@ -5,10 +5,9 @@
 //  Created by Joe Maghzal on 20/12/2025.
 //
 
-import Foundation
 public import AST
-import Basic
 public import Diagnostics
+import Foundation
 
 public struct Sema {
     private let diagnostics: any DiagnosticsEngine

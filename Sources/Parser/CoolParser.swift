@@ -5,11 +5,11 @@
 //  Created by Joe Maghzal on 22/11/2025.
 //
 
-import Foundation
 public import AST
-import Basic
 public import Diagnostics
 public import Lexer
+import Foundation
+import Basic
 
 public struct CoolParser {
     private let diagnostics: any DiagnosticsEngine

@@ -5,8 +5,8 @@
 //  Created by Joe Maghzal on 12/09/2026.
 //
 
-import Foundation
 public import AST
+import Foundation
 
 public enum ResolvedBinaryOperator {
     case lessThan, lessThanOrEqual, plus, minus, slash, star, equal

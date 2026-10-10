@@ -5,8 +5,8 @@
 //  Created by Joe Maghzal on 12/09/2026.
 //
 
-import Foundation
 public import AST
+import Foundation
 
 public struct ResolvedDeclRefExpr: ResolvedExpr {
     public let name: String

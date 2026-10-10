@@ -8,9 +8,7 @@
 import Testing
 import Foundation
 import AST
-import Basic
 import Diagnostics
-import Lexer
 import Parser
 import TestSupport
 @testable import Sema

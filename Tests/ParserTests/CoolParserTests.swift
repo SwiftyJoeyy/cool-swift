@@ -8,9 +8,7 @@
 import Testing
 import Foundation
 import AST
-import Basic
 import Diagnostics
-import Lexer
 @testable import Parser
 
 @Suite struct CoolParserTests: ParserTestSuite {

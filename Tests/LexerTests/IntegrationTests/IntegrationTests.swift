@@ -8,7 +8,6 @@
 import Testing
 import Foundation
 import Diagnostics
-import Basic
 @testable import Lexer
 
 protocol TestFile {

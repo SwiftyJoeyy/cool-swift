@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Basic
 
 public protocol Decl: ASTNode {
     var name: Identifier { get }

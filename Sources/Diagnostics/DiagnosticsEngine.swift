@@ -5,8 +5,8 @@
 //  Created by Joe Maghzal on 24/11/2025.
 //
 
-import Foundation
 public import Basic
+import Foundation
 
 public protocol DiagnosticsEngine {
     func insert(_ diagnostic: Diagnostic)

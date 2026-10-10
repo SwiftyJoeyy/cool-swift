@@ -5,9 +5,9 @@
 //  Created by Joe Maghzal on 22/11/2025.
 //
 
-import Foundation
 public import Diagnostics
 public import Lexer
+import Foundation
 
 public enum ParserError {
 // MARK: - ClassDecl

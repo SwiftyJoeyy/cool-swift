@@ -5,10 +5,9 @@
 //  Created by Joe Maghzal on 13/01/2026.
 //
 
-import Foundation
 public import AST
-import Basic
 public import Diagnostics
+import Foundation
 
 public class ModuleInterfaceSymbols {
     private(set) var symbols = [ResolvedType: ClassSymbol]()

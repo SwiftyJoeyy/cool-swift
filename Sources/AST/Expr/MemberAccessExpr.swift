@@ -5,8 +5,8 @@
 //  Created by Joe Maghzal on 02/12/2025.
 //
 
-import Foundation
 public import Basic
+import Foundation
 
 public struct MemberAccessExpr: Expr {
     public let base: any Expr

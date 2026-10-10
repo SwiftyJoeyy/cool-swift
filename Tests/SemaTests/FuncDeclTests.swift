@@ -7,12 +7,7 @@
 
 import Testing
 import Foundation
-import AST
-import Basic
 import Diagnostics
-import Lexer
-import Parser
-@testable import Sema
 
 @Suite struct FuncDeclTests {
 // MARK: - Valid Function Declarations

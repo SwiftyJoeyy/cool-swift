@@ -5,8 +5,8 @@
 //  Created by Joe Maghzal on 13/01/2026.
 //
 
-import Foundation
 public import Basic
+import Foundation
 
 public struct InterfaceFuncDecl: MethodDecl {
     public let name: Identifier

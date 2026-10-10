@@ -6,7 +6,6 @@
 //
 
 import Testing
-import Diagnostics
 @testable import Lexer
 
 @Suite struct PunctuationLexerTests {

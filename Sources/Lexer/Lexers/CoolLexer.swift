@@ -5,8 +5,8 @@
 //  Created by Joe Maghzal on 25/10/2025.
 //
 
-import Foundation
 public import Diagnostics
+import Foundation
 
 protocol TokenLexer {
     static func matches(_ char: UInt8) -> Bool

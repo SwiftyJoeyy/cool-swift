@@ -5,8 +5,8 @@
 //  Created by Joe Maghzal on 13/12/2025.
 //
 
-import Foundation
 public import Diagnostics
+import Foundation
 
 public struct Lexemes {
     private var lexer: CoolLexer

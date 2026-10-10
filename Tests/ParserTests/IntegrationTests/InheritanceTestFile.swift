@@ -8,9 +8,6 @@
 import Testing
 import Foundation
 import AST
-import Basic
-import Diagnostics
-@testable import Parser
 
 enum InheritanceTestFile: TestFile {
     static let name = "inheritance"

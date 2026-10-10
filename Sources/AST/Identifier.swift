@@ -5,8 +5,8 @@
 //  Created by Joe Maghzal on 26/12/2025.
 //
 
-import Foundation
 public import Basic
+import Foundation
 
 public struct Identifier: ASTNode {
     public let value: String
