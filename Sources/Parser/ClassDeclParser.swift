@@ -11,10 +11,10 @@ import Basic
 import Diagnostics
 import Lexer
 
-internal struct ClassDeclParser<P: MemberDeclParser> {
-    internal let memberParser: P
+struct ClassDeclParser<P: MemberDeclParser> {
+    let memberParser: P
     
-    internal func parse(
+    func parse(
         from parser: inout CoolParser
     ) throws(Diagnostic) -> ClassDecl {
         let location = parser.currentToken.location
@@ -43,7 +43,7 @@ internal struct ClassDeclParser<P: MemberDeclParser> {
         )
     }
     
-    internal func parseInheritanceClause(
+    func parseInheritanceClause(
         from parser: inout CoolParser
     ) throws(Diagnostic) -> InheritanceClause {
         let inheritsToken = parser.currentToken
@@ -62,7 +62,7 @@ internal struct ClassDeclParser<P: MemberDeclParser> {
         )
     }
     
-    internal func parseMembersBlock(
+    func parseMembersBlock(
         from parser: inout CoolParser,
         classLocation: SourceLocation
     ) throws(Diagnostic) -> MembersBlock {

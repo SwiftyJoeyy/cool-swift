@@ -8,12 +8,12 @@
 import Foundation
 import Diagnostics
 
-internal struct IdentifierLexer: TokenLexer {
-    internal static func matches(_ char: UInt8) -> Bool {
+struct IdentifierLexer: TokenLexer {
+    static func matches(_ char: UInt8) -> Bool {
         return (char >= "a" && char <= "z") || (char >= "A" && char <= "Z")
     }
     
-    internal static func lex(for cursor: inout Cursor) throws(Diagnostic) -> Token {
+    static func lex(for cursor: inout Cursor) throws(Diagnostic) -> Token {
         let start = cursor.location
         assert(cursor.peek() != nil)
         var literal = cursor.peek()!.unicode

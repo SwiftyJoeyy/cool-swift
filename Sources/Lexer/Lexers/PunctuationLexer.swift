@@ -8,12 +8,12 @@
 import Foundation
 import Diagnostics
 
-internal struct PunctuationLexer: TokenLexer {
-    internal static func matches(_ char: UInt8) -> Bool {
+struct PunctuationLexer: TokenLexer {
+    static func matches(_ char: UInt8) -> Bool {
         return char == "@" || char == ":" || char == "," || char == "." || char == "{" || char == "(" || char == ")" || char == "}" || char == ";"
     }
     
-    internal static func lex(for cursor: inout Cursor) throws(Diagnostic) -> Token {
+    static func lex(for cursor: inout Cursor) throws(Diagnostic) -> Token {
         let start = cursor.location
         assert(cursor.peek() != nil)
         let char = cursor.peek()!.unicode

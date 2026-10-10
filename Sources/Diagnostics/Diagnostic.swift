@@ -63,7 +63,7 @@ extension Diagnostic {
     }
     
 #if DEBUG
-    internal consuming func debugInfo(_ info: String) -> Self {
+    consuming func debugInfo(_ info: String) -> Self {
         self.debugInfo = info
         return self
     }

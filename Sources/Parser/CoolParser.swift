@@ -14,7 +14,7 @@ import Lexer
 public struct CoolParser {
     private let diagnostics: DiagnosticsEngine
     
-    internal private(set) var currentToken: Token
+    private(set) var currentToken: Token
     private var lexemes: Lexemes
     
     public init(
@@ -68,17 +68,17 @@ public struct CoolParser {
 
 extension CoolParser {
     @discardableResult
-    internal mutating func advance() throws(Diagnostic) -> Token {
+    mutating func advance() throws(Diagnostic) -> Token {
         currentToken = try lexemes.consume()
         return currentToken
     }
     
     @discardableResult
-    internal mutating func advanced() throws(Diagnostic) -> Token {
+    mutating func advanced() throws(Diagnostic) -> Token {
         return try lexemes.peek()
     }
     
-    @discardableResult internal mutating func advance(
+    @discardableResult mutating func advance(
         if predicate: (borrowing Token) -> Bool
     ) throws(Diagnostic) -> Token? {
         let next = try lexemes.peek()
@@ -90,7 +90,7 @@ extension CoolParser {
         return nil
     }
     
-    internal mutating func advance(
+    mutating func advance(
         until predicate: (borrowing Token) -> Bool
     ) throws(Diagnostic) {
         while !predicate(currentToken), currentToken.kind != .endOfFile {
@@ -100,13 +100,13 @@ extension CoolParser {
 }
 
 extension CoolParser {
-    @inline(__always) internal func at(
+    @inline(__always) func at(
         _ predicate: (borrowing Token) -> Bool
     ) -> Bool {
         return predicate(currentToken)
     }
     
-    @inline(__always) internal func at(
+    @inline(__always) func at(
         _ kind: TokenKind
     ) -> Bool {
         return at({$0.kind == kind})
@@ -114,7 +114,7 @@ extension CoolParser {
 }
 
 extension CoolParser {
-    internal func diagnose(_ diagnostic: Diagnostic) {
+    func diagnose(_ diagnostic: Diagnostic) {
         diagnostics.insert(diagnostic)
     }
 }

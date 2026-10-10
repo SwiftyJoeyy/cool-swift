@@ -8,8 +8,8 @@
 import Foundation
 import Diagnostics
 
-internal struct IntegerLiteralLexer: TokenLexer {
-    internal static func matches(_ char: UInt8) -> Bool {
+struct IntegerLiteralLexer: TokenLexer {
+    static func matches(_ char: UInt8) -> Bool {
         return valid(char)
     }
     

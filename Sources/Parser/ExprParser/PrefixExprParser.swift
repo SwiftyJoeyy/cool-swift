@@ -12,7 +12,7 @@ import Diagnostics
 import Lexer
 
 extension ExprParser {
-    internal static func parsePrefix(
+    static func parsePrefix(
         from parser: inout CoolParser
     ) throws(Diagnostic) -> Expr {
         let token = parser.currentToken

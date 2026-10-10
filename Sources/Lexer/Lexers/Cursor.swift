@@ -9,7 +9,7 @@ import Foundation
 import Basic
 import Diagnostics
 
-internal struct Cursor {
+struct Cursor {
     private let input: [UInt8]
     private let length: Int
     private let file: String
@@ -18,21 +18,21 @@ internal struct Cursor {
     private var line = 1
     private var column = 1
     
-    internal var reachedEnd: Bool {
+    var reachedEnd: Bool {
         return position >= length
     }
     
-    internal var location: SourceLocation {
+    var location: SourceLocation {
         SourceLocation(line: line, column: column, file: file)
     }
     
-    internal init(_ string: String, file: String) {
+    init(_ string: String, file: String) {
         self.input = Array(string.utf8)
         self.length = input.count
         self.file = file
     }
     
-    internal func peek(aheadBy offset: Int = 0) -> UInt8? {
+    func peek(aheadBy offset: Int = 0) -> UInt8? {
         let pos = position + offset
         guard pos < length else {
             return nil
@@ -40,7 +40,7 @@ internal struct Cursor {
         return input[pos]
     }
     
-    @discardableResult internal mutating func advance(by offset: Int = 1) -> Bool {
+    @discardableResult mutating func advance(by offset: Int = 1) -> Bool {
         guard position + offset <= length else {
             position = length
             return false
@@ -60,13 +60,13 @@ internal struct Cursor {
         return true
     }
     
-    internal mutating func advance(until predicate: (UInt8) -> Bool) {
+    mutating func advance(until predicate: (UInt8) -> Bool) {
         while let char = peek(), !predicate(char) {
             advance()
         }
     }
     
-    internal mutating func next() -> UInt8? {
+    mutating func next() -> UInt8? {
         guard advance() else {
             return nil
         }

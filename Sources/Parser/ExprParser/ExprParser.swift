@@ -11,8 +11,8 @@ import Basic
 import Diagnostics
 import Lexer
 
-internal struct ExprParser {
-    internal static func parse(
+struct ExprParser {
+    static func parse(
         from parser: inout CoolParser,
         minPrecedence: Precedence = .none
     ) throws(Diagnostic) -> Expr {
@@ -27,7 +27,7 @@ internal struct ExprParser {
 }
 
 extension ExprParser {
-    internal enum Precedence: Comparable {
+    enum Precedence: Comparable {
         case none
         case assignment
         case comparison
@@ -58,11 +58,11 @@ extension ExprParser {
             }
         }
         
-        internal var higher: Precedence {
+        var higher: Precedence {
             return .custom(rawValue + 1)
         }
         
-        internal static func < (lhs: Precedence, rhs: Precedence) -> Bool {
+        static func < (lhs: Precedence, rhs: Precedence) -> Bool {
             lhs.rawValue < rhs.rawValue
         }
     }

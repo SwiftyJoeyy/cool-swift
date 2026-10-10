@@ -8,7 +8,7 @@
 import Foundation
 import Diagnostics
 
-internal protocol TokenLexer {
+protocol TokenLexer {
     static func matches(_ char: UInt8) -> Bool
     
     static func lex(for cursor: inout Cursor) throws(Diagnostic) -> Token
@@ -102,11 +102,11 @@ extension CoolLexer {
     private struct Chain<each L: TokenLexer> {
         private let lexer: (repeat (each L).Type)
         
-        internal init(_ lexer: repeat (each L).Type) {
+        init(_ lexer: repeat (each L).Type) {
             self.lexer = (repeat each lexer)
         }
         
-        internal func lexer(_ char: UInt8) -> TokenLexer.Type? {
+        func lexer(_ char: UInt8) -> TokenLexer.Type? {
             for item in repeat each lexer {
                 if item.matches(char) {
                     return item

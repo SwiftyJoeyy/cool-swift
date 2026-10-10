@@ -11,8 +11,8 @@ import Basic
 import Diagnostics
 import Lexer
 
-internal struct InterfaceFuncDeclParser {
-    internal static func parse(
+struct InterfaceFuncDeclParser {
+    static func parse(
         from parser: inout CoolParser
     ) throws(Diagnostic) -> InterfaceFuncDecl {
         let location = parser.currentToken.location
@@ -48,8 +48,8 @@ internal struct InterfaceFuncDeclParser {
     }
 }
 
-internal struct InterfaceVarDeclParser {
-    internal static func parse(
+struct InterfaceVarDeclParser {
+    static func parse(
         from parser: inout CoolParser
     ) throws(Diagnostic) -> InterfaceVarDecl {
         let location = parser.currentToken.location

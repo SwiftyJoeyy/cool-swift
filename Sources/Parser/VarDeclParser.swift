@@ -11,8 +11,8 @@ import Basic
 import Diagnostics
 import Lexer
 
-internal struct VarDeclParser {
-    internal static func parse(from parser: inout CoolParser) throws(Diagnostic) -> VarDecl {
+struct VarDeclParser {
+    static func parse(from parser: inout CoolParser) throws(Diagnostic) -> VarDecl {
         let location = parser.currentToken.location
         guard case .identifier(let name) = parser.currentToken.kind else {
             throw ParserError.expectedVarName.diagnostic(at: location)
@@ -50,7 +50,7 @@ internal struct VarDeclParser {
         )
     }
     
-    internal static func parseInitializer(
+    static func parseInitializer(
         from parser: inout CoolParser
     ) throws(Diagnostic) -> InitializerClause {
         let assignToken = parser.currentToken

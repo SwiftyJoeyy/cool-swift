@@ -8,12 +8,12 @@
 import Foundation
 import Diagnostics
 
-internal struct StringLiteralLexer: TokenLexer {
-    internal static func matches(_ char: UInt8) -> Bool {
+struct StringLiteralLexer: TokenLexer {
+    static func matches(_ char: UInt8) -> Bool {
         return char == .quote
     }
     
-    internal static func lex(for cursor: inout Cursor) throws(Diagnostic) -> Token {
+    static func lex(for cursor: inout Cursor) throws(Diagnostic) -> Token {
         let start = cursor.location
         var literal = ""
         var length = 0

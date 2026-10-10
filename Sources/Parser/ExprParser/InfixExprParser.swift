@@ -12,7 +12,7 @@ import Diagnostics
 import Lexer
 
 extension ExprParser {
-    internal static func parseInfix(
+    static func parseInfix(
         from parser: inout CoolParser,
         left: Expr,
         precedence: Precedence
