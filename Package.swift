@@ -20,6 +20,7 @@ let package = Package(
         Lexer.product,
         Parser.product,
         Sema.product,
+        CodeGen.product,
         CoreModule.product
     ],
     dependencies: [
@@ -38,6 +39,9 @@ let package = Package(
         
         Sema.target,
         Sema.tests,
+        
+        CodeGen.target,
+        CodeGen.tests,
         
         CoreModule.target,
         CoreModule.embedder,
@@ -287,7 +291,8 @@ enum CodeGen {
                 Basic.dependency,
                 Diagnostics.dependency,
                 Sema.dependency
-            ]
+            ],
+            swiftSettings: upcomingFeatures
         )
     }
     static var tests: Target {
@@ -297,9 +302,12 @@ enum CodeGen {
                 CodeGen.dependency,
                 Sema.dependency,
                 Parser.dependency,
-                Lexer.dependency
+                Lexer.dependency,
+                TestSupport.dependency,
+                CoreModule.dependency
             ],
-            resources: [.copy("Resources")]
+            resources: [.copy("Expected")],
+            swiftSettings: upcomingFeatures
         )
     }
 }
