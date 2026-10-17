@@ -219,4 +219,25 @@ import TestSupport
         }
         #expect(error?.message == "invalid redeclaration of 'bar'")
     }
+    
+// MARK: - Resolved Source Tests
+    @Test func `resolved source includes the interface classes`() throws {
+        let source = try resolve("class Main { };")
+        let interface = source.interfaceDeclarations
+        
+        #expect(interface.map(\.name) == ["Object", "IO", "Int", "String", "Bool"])
+        #expect(interface.first?.parent == nil)
+        #expect(interface.dropFirst().allSatisfy { $0.parent == .object })
+        #expect(source.declarations.map(\.name) == ["Main"])
+    }
+    
+    @Test func `resolves interface method signatures`() throws {
+        let io = try #require(try resolve("class Main { };").interfaceDeclarations.first { $0.name == "IO" })
+        let outString = try #require(io.methods.first { $0.name == "out_string" })
+        
+        #expect(io.methods.map(\.name) == ["out_string", "out_int", "in_string", "in_int"])
+        #expect(outString.parameters.map(\.name) == ["x"])
+        #expect(outString.parameters.map(\.type) == [.string])
+        #expect(outString.type == ResolvedType(name: "IO", isSelfType: true))
+    }
 }

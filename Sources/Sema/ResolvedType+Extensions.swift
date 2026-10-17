@@ -9,13 +9,13 @@ import Foundation
 import AST
 
 extension ResolvedType {
-    static let selfType = ResolvedType(name: "SELF_TYPE")
-    static let object = ResolvedType(name: "Object")
-    static let io = ResolvedType(name: "IO")
-    static let int = ResolvedType(name: "Int")
-    static let bool = ResolvedType(name: "Bool")
-    static let string = ResolvedType(name: "String")
-    static let main = ResolvedType(name: "Main")
+    public static let selfType = ResolvedType(name: "SELF_TYPE")
+    public static let object = ResolvedType(name: "Object")
+    public static let io = ResolvedType(name: "IO")
+    public static let int = ResolvedType(name: "Int")
+    public static let bool = ResolvedType(name: "Bool")
+    public static let string = ResolvedType(name: "String")
+    public static let main = ResolvedType(name: "Main")
 }
 
 extension TypeRef {

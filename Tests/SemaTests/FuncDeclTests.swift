@@ -8,6 +8,7 @@
 import Testing
 import Foundation
 import Diagnostics
+import Sema
 
 @Suite struct FuncDeclTests {
 // MARK: - Valid Function Declarations
@@ -21,6 +22,18 @@ import Diagnostics
         """
         
         try analyze(source)
+    }
+    
+    @Test func `keeps parameters in declaration order`() throws {
+        let source = """
+        class Main {
+            foo(c : Int, a : String, b : Bool) : Int { 0 };
+        };
+        """
+        
+        let method = try #require(try resolve(source).declarations.first?.methods.first)
+        #expect(method.parameters.map(\.name) == ["c", "a", "b"])
+        #expect(method.parameters.map(\.type.name) == ["Int", "String", "Bool"])
     }
     
     @Test func `validates function with parameters`() throws {

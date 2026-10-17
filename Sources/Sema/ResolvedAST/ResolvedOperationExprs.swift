@@ -15,13 +15,13 @@ public enum ResolvedBinaryOperator {
 public struct ResolvedOperationExpr: ResolvedExpr {
     public let type: ResolvedType
     public let lhs: any ResolvedExpr
-    public let op: BinaryOperator
+    public let op: ResolvedBinaryOperator
     public let rhs: any ResolvedExpr
     public let expr: any Expr
 }
 
 public struct ResolvedAssignmentExpr: ResolvedExpr {
-    public let target: any ResolvedExpr
+    public let target: ResolvedDeclRefExpr
     public let value: any ResolvedExpr
     public let expr: any Expr
     

@@ -17,24 +17,25 @@ struct ExprTypeVisitor: ExprVisitor {
     
     mutating func visit(_ expr: StringLiteralExpr) throws(Diag) {
         resolvedExpr = ResolvedLiteralExpr(
-            type: .string,
-            value: expr.value,
+            value: .string(expr.value),
             expr: expr
         )
     }
     
     mutating func visit(_ expr: IntegerLiteralExpr) throws(Diag) {
+        guard let value = Int32(expr.value) else {
+            throw SemaError.integerLiteralOverflow(expr.value)
+                .diagnostic(at: expr.location)
+        }
         resolvedExpr = ResolvedLiteralExpr(
-            type: .int,
-            value: expr.value,
+            value: .int(value),
             expr: expr
         )
     }
     
     mutating func visit(_ expr: BoolLiteralExpr) throws(Diag) {
         resolvedExpr = ResolvedLiteralExpr(
-            type: .bool,
-            value: expr.value,
+            value: .bool(expr.value.lowercased() == "true"),
             expr: expr
         )
     }
@@ -71,22 +72,21 @@ struct ExprTypeVisitor: ExprVisitor {
             let argument = expr.arguments[index]
             let resolvedArg = try typeSystem.typeCheck(argument, scope: scope)
             
-            let paramType = try typeSystem.checkType(param.type, base: base.type)
+            let paramType = try typeSystem.checkType(param.type, base: base.type.classType)
             if !typeSystem.conforms(resolvedArg.type, to: paramType) {
                 throw SemaError.argumentTypeMismatch(
-                    expected: paramType.name,
-                    got: resolvedArg.type.name
+                    expected: paramType.description,
+                    got: resolvedArg.type.description
                 ).diagnostic(at: argument.location)
             }
             arguments.append(resolvedArg)
         }
         
         let returnType = funcDecl.returnClause.type
-        let type = try typeSystem.checkType(returnType, base: base.type)
+        let type = try typeSystem.checkType(returnType, base: base.receiverType)
         resolvedExpr = ResolvedFuncCallExpr(
             name: funcDecl.name.value,
             type: type,
-            index: symbolMember.index,
             arguments: arguments,
             base: base,
             expr: expr
@@ -111,7 +111,7 @@ struct ExprTypeVisitor: ExprVisitor {
         let dispatchType = try typeSystem.checkType(expr.type, base: scope.baseType)
         guard typeSystem.conforms(resolvedBase.type, to: dispatchType) else {
             throw SemaError.invalidStaticDispatch(
-                type: resolvedBase.type.name,
+                type: resolvedBase.type.description,
                 parent: expr.type.name
             ).diagnostic(at: expr.type.location)
         }
@@ -128,7 +128,7 @@ struct ExprTypeVisitor: ExprVisitor {
             scope: scope
         )
         guard resolvedCondition.type == .bool else {
-            throw SemaError.conditionTypeMismatch(resolvedCondition.type.name)
+            throw SemaError.conditionTypeMismatch(resolvedCondition.type.description)
                 .diagnostic(at: expr.condition.location)
         }
         
@@ -149,7 +149,7 @@ struct ExprTypeVisitor: ExprVisitor {
             scope: scope
         )
         guard resolvedCondition.type == .bool else {
-            throw SemaError.conditionTypeMismatch(resolvedCondition.type.name)
+            throw SemaError.conditionTypeMismatch(resolvedCondition.type.description)
                 .diagnostic(at: expr.condition.location)
         }
         
@@ -214,8 +214,9 @@ struct ExprTypeVisitor: ExprVisitor {
                 throw SemaError.duplicateDeclaration(binding.name.value)
                     .diagnostic(at: binding.location)
             }
-            resolvedBindings.append(try typeSystem.typeCheck(binding, scope: scope))
-            environment.insert(binding)
+            let resolvedBinding = try typeSystem.typeCheck(binding, scope: scope)
+            resolvedBindings.append(resolvedBinding)
+            environment.insert(resolvedBinding)
         }
         
         let resolvedBody = try typeSystem.typeCheck(expr.body, scope: scope)
@@ -234,6 +235,7 @@ struct ExprTypeVisitor: ExprVisitor {
             expressions.append(try typeSystem.typeCheck(expression, scope: scope))
         }
         resolvedExpr = ResolvedBlockExpr(
+            type: expressions.last?.type ?? .object,
             expressions: expressions,
             expr: expr
         )
@@ -249,8 +251,8 @@ struct ExprTypeVisitor: ExprVisitor {
         if op.op == .equal, lhsType != rhsType, (lhsType.isBasicType || rhsType.isBasicType) {
             throw SemaError.binaryOperatorTypeMismatch(
                 op: op.description,
-                lhs: lhsType.name,
-                rhs: rhsType.name
+                lhs: lhsType.description,
+                rhs: rhsType.description
             ).diagnostic(at: op.location)
         } else if op.op != .equal, lhsType != .int || rhsType != .int {
             throw SemaError.binaryOperatorInvalidType(
@@ -262,7 +264,7 @@ struct ExprTypeVisitor: ExprVisitor {
         resolvedExpr = ResolvedOperationExpr(
             type: op.op.isComparison ? .bool: .int,
             lhs: resolvedLHS,
-            op: op,
+            op: ResolvedBinaryOperator(op.op),
             rhs: resolvedRHS,
             expr: expr
         )
@@ -280,8 +282,8 @@ struct ExprTypeVisitor: ExprVisitor {
         let resolvedValue = try typeSystem.typeCheck(expr.value, scope: scope)
         guard typeSystem.conforms(resolvedValue.type, to: resolvedTarget.type) else {
             throw SemaError.assignmentTypeMismatch(
-                expected: resolvedTarget.type.name,
-                got: resolvedValue.type.name
+                expected: resolvedTarget.type.description,
+                got: resolvedValue.type.description
             ).diagnostic(at: expr.value.location)
         }
         resolvedExpr = ResolvedAssignmentExpr(
@@ -292,7 +294,7 @@ struct ExprTypeVisitor: ExprVisitor {
     }
     
     mutating func visit(_ expr: NewExpr) throws(Diag) {
-        let resolvedType = try typeSystem.checkType(expr.type, base: scope.baseType)
+        let resolvedType = try typeSystem.checkType(expr.type, base: scope.selfType)
         resolvedExpr = ResolvedNewExpr(
             type: resolvedType,
             expr: expr
@@ -346,7 +348,7 @@ struct ExprTypeVisitor: ExprVisitor {
             case .letBinding: .letBinding
             case .caseBranch: .caseBranch
             case .selfRef: .selfRef
-            case .localDecl(let member): .localDecl(index: member.index, base: base)
+            case .localDecl: .localDecl(base: base)
         }
         return ResolvedDeclRefExpr(
             name: member.name,
@@ -361,13 +363,13 @@ struct ExprTypeVisitor: ExprVisitor {
     ) throws(Diag) -> (base: DeclRefBase, member: ScopedMember, expr: DeclRefExpr) {
         if let refExpr = expr as? DeclRefExpr {
             if refExpr.name == "self" {
-                return (.selfRef(scope.baseType), ScopedMember(name: "self", type: scope.baseType, refType: .selfRef), refExpr)
+                return (.selfRef(scope.selfType), ScopedMember(name: "self", type: scope.selfType, refType: .selfRef), refExpr)
             }
             guard let member = try scope.lookup(member: refExpr.name) else {
                 throw SemaError.undefinedIdentifier(refExpr.name)
                     .diagnostic(at: expr.location)
             }
-            return (.selfRef(scope.baseType), member, refExpr)
+            return (.selfRef(scope.selfType), member, refExpr)
         } else if let accessExpr = expr as? MemberAccessExpr {
             let resolvedBase = try typeSystem.typeCheck(
                 accessExpr.base,
@@ -379,20 +381,51 @@ struct ExprTypeVisitor: ExprVisitor {
             ) else {
                 throw SemaError.undefinedMember(
                     member: accessExpr.member.name,
-                    baseType: resolvedBase.type.name
+                    baseType: resolvedBase.type.description
                 ).diagnostic(at: accessExpr.member.location)
             }
             
-            let type = try typeSystem.checkType(symbolMember.decl.type, base: symbolMember.parent)
+            let base: DeclRefBase = if let dispatch = resolvedBase as? ResolvedStaticDispatchExpr {
+                .staticDispatch(dispatch)
+            } else {
+                .expr(resolvedBase)
+            }
+            let type = try typeSystem.checkType(symbolMember.decl.type, base: base.receiverType)
             let member = ScopedMember(
                 name: symbolMember.decl.name.value,
                 type: type,
                 refType: .localDecl(symbolMember)
             )
-            return (.expr(resolvedBase), member, accessExpr.member)
+            return (base, member, accessExpr.member)
         }
         
         fatalError()
+    }
+}
+
+extension DeclRefBase {
+    /// The type of the object the member is accessed on. For `e@T.f()` that's
+    /// `e`'s type, so a `SELF_TYPE` result is the receiver's type, not `T`.
+    fileprivate var receiverType: ResolvedType {
+        switch self {
+            case .selfRef(let type): type
+            case .expr(let resolvedExpr): resolvedExpr.type
+            case .staticDispatch(let dispatch): dispatch.base.type
+        }
+    }
+}
+
+extension ResolvedBinaryOperator {
+    fileprivate init(_ op: BinaryOperator.Operator) {
+        switch op {
+            case .lessThan: self = .lessThan
+            case .lessThanOrEqual: self = .lessThanOrEqual
+            case .plus: self = .plus
+            case .minus: self = .minus
+            case .slash: self = .slash
+            case .star: self = .star
+            case .equal: self = .equal
+        }
     }
 }
 

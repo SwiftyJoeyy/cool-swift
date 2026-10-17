@@ -37,12 +37,9 @@ public struct ResolvedCaseExpr: ResolvedExpr {
 }
 
 public struct ResolvedBlockExpr: ResolvedExpr {
+    public let type: ResolvedType
     public let expressions: [any ResolvedExpr]
     public let expr: any Expr
-    
-    public var type: ResolvedType {
-        return expressions.last!.type
-    }
 }
 
 public struct ResolvedLetExpr: ResolvedExpr {

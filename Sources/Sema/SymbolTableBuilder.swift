@@ -68,6 +68,10 @@ struct SymbolTableBuilder {
         inheritedType: some TypeRef
     ) throws(Diagnostic) -> ClassSymbol {
         let inhType = inheritedType.resolved
+        if inhType.isBasicType {
+            throw SemaError.cannotInheritFromBasicType(inheritedType.name)
+                .diagnostic(at: inheritedType.location)
+        }
         if let inhSymbol = symbols.lookup(inhType) {
             return inhSymbol
         }
@@ -93,9 +97,9 @@ struct SymbolTableBuilder {
     private func validateMembers(for symbol: ClassSymbol) throws(Diagnostic) {
         let type = symbol.type
         let members = symbol.decl.membersBlock.members
-        for (index, member) in members.enumerated() {
+        for member in members {
             guard let item = symbol.lookup(member.name.value) else {
-                symbol.insert(member, index: index)
+                symbol.insert(member)
                 continue
             }
             
@@ -164,7 +168,7 @@ struct SymbolTableBuilder {
                         throw SemaError.funcOverrideMismatch(diffs)
                             .diagnostic(at: member.name.location)
                     }
-                    symbol.insert(member, index: index)
+                    symbol.insert(member)
                 case (.varDecl, .funcDecl(let decl)):
                     throw SemaError.propertyCannotOverrideFunc(decl.name.value)
                         .diagnostic(at: member.name.location)

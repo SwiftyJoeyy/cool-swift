@@ -25,13 +25,12 @@ class SymbolTable {
     }
     
     func lookup(_ type: ResolvedType) -> ClassSymbol? {
-        return symbolsMap[type] ?? interfaceSymbols.lookup(type)
+        return symbolsMap[type.classType] ?? interfaceSymbols.lookup(type)
     }
 }
 
 final class ClassSymbol {
     private var decls = [String: MemberDecl]()
-    private var declsIndex = [String: Int]()
     
     let decl: ClassDecl
     var superclass: ClassSymbol?
@@ -47,21 +46,14 @@ final class ClassSymbol {
         self.decl = decl
     }
     
-    func insert(_ decl: MemberDecl, index: Int) {
+    func insert(_ decl: MemberDecl) {
         guard decls[decl.name.value] == nil else { return }
-        declsIndex[decl.name.value] = index
         decls[decl.name.value] = decl
     }
     
     func lookup(_ id: String) -> SymbolMember? {
-//        if id == .`self` {
-//            return SymbolMember(
-//                decl: SelfDecl(type: decl.name.value),
-//                parent: type
-//            )
-//        }
-        if let member = decls[id], let index = declsIndex[id] {
-            return SymbolMember(decl: member, parent: type, index: index)
+        if let member = decls[id] {
+            return SymbolMember(decl: member, parent: type)
         }
         return superclass?.lookup(id)
     }
@@ -70,5 +62,4 @@ final class ClassSymbol {
 struct SymbolMember {
     let decl: MemberDecl
     let parent: ResolvedType
-    let index: Int
 }

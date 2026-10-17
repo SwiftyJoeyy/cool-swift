@@ -85,7 +85,7 @@ struct DefaultTypeSystem: TypeSystem {
         _ varDecl: VarDecl,
         scope: any Scope
     ) throws(Diagnostic) -> ResolvedVarDecl {
-        let type = try checkType(varDecl.typeAnnotation.type, base: scope.baseType)
+        let type = try checkType(varDecl.typeAnnotation.type, base: scope.selfType)
         var initExpr: (any ResolvedExpr)?
         if let initializer = varDecl.initializer {
             let resolvedInit = try typeCheck(
@@ -94,8 +94,8 @@ struct DefaultTypeSystem: TypeSystem {
             )
             if !conforms(resolvedInit.type, to: type) {
                 throw SemaError.initializerTypeMismatch(
-                    expected: type.name,
-                    got: resolvedInit.type.name
+                    expected: type.description,
+                    got: resolvedInit.type.description
                 ).diagnostic(at: initializer.expr.location)
             }
             initExpr = resolvedInit
@@ -115,29 +115,33 @@ struct DefaultTypeSystem: TypeSystem {
     ) throws(Diagnostic) -> ResolvedFuncDecl {
         let returnType = try checkType(
             funcDecl.returnClause.type,
-            base: scope.baseType
+            base: scope.selfType
         )
         
         var params = [String: ResolvedParameterDecl]()
+        var orderedParams = [ResolvedParameterDecl]()
         for param in funcDecl.parameters.parameters {
             if params[param.name.value] != nil {
                 throw SemaError.duplicateDeclaration(param.name.value)
                     .diagnostic(at: param.name.location)
             }
+            
             let resolvedType = try checkType(param.type, base: scope.baseType)
-            params[param.name.value] = ResolvedParameterDecl(
+            let resolvedParam = ResolvedParameterDecl(
                 name: param.name.value,
                 type: resolvedType,
                 decl: param
             )
+            params[param.name.value] = resolvedParam
+            orderedParams.append(resolvedParam)
         }
         let funcScope = FuncScope(parentScope: scope, parameters: params)
         let resolvedBody = try typeCheck(funcDecl.body, scope: funcScope)
         
         if !conforms(resolvedBody.type, to: returnType) {
             throw SemaError.initializerTypeMismatch(
-                expected: returnType.name,
-                got: resolvedBody.type.name
+                expected: returnType.description,
+                got: resolvedBody.type.description
             ).diagnostic(at: funcDecl.body.location)
         }
         
@@ -145,7 +149,7 @@ struct DefaultTypeSystem: TypeSystem {
             name: funcDecl.name.value,
             type: returnType,
             parentType: scope.baseType,
-            parameters: [],
+            parameters: orderedParams,
             body: resolvedBody,
             decl: funcDecl
         )
@@ -186,6 +190,12 @@ struct DefaultTypeSystem: TypeSystem {
         if type == supertype || supertype == .object {
             return true
         }
+        if supertype.isSelfType {
+            return false
+        }
+        if type.classType == supertype {
+            return true
+        }
         var parent = symbols.lookup(type)?.superclass
         while parent != nil {
             if parent?.type == supertype {
@@ -203,13 +213,18 @@ struct DefaultTypeSystem: TypeSystem {
         if type1 == type2 {
             return type1
         }
+        let type1 = type1.classType
+        let type2 = type2.classType
+        if type1 == type2 {
+            return type1
+        }
         var symbol1 = symbols.lookup(type1)?.superclass
         var symbol2 = symbols.lookup(type2)?.superclass
         var types: Set<ResolvedType> = [type1, type2]
         
         while let t1 = symbol1?.type, let t2 = symbol2?.type {
             if !types.insert(t1).inserted {
-               return t1
+                return t1
             }
             if !types.insert(t2).inserted {
                 return t2

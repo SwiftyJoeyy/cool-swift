@@ -12,6 +12,7 @@ import Foundation
 public enum SemaError {
     case duplicateClass(String)
     case undefinedParentClass(String)
+    case cannotInheritFromBasicType(String)
     case cyclicInheritance(String)
     case selfInheritance(String)
     case duplicateDeclaration(String)
@@ -29,6 +30,7 @@ public enum SemaError {
     case cannotCallNonFunction(String)
     case argumentCountMismatch(expected: Int, got: Int)
     case argumentTypeMismatch(expected: String, got: String)
+    case integerLiteralOverflow(String)
     case binaryOperatorTypeMismatch(op: String, lhs: String, rhs: String)
     case conditionTypeMismatch(String)
     case typeMismatch(expected: String, got: String)
@@ -65,6 +67,8 @@ extension SemaError: DiagnosticConvertible {
                 return "duplicate class '\(name)'"
             case .undefinedParentClass(let name):
                 return "parent class '\(name)' is not defined"
+            case .cannotInheritFromBasicType(let name):
+                return "cannot inherit from basic type '\(name)'"
             case .cyclicInheritance(let name):
                 return "class '\(name)' has cyclic inheritance"
             case .selfInheritance(let name):
@@ -103,6 +107,8 @@ extension SemaError: DiagnosticConvertible {
                 }
             case .argumentTypeMismatch(let expected, let got):
                 return "cannot convert value of type '\(got)' to expected argument type '\(expected)'"
+            case .integerLiteralOverflow(let value):
+                return "integer literal '\(value)' overflows when stored into 'Int'"
             case .binaryOperatorTypeMismatch(let op, let lhs, let rhs):
                 return "binary operator '\(op)' cannot be applied to operands of type '\(lhs)' and '\(rhs)'"
             case .conditionTypeMismatch(let type):

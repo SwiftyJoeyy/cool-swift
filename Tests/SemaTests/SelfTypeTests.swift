@@ -7,6 +7,7 @@
 
 import Testing
 import Foundation
+import Diagnostics
 
 @Suite struct SelfTypeTests {
 // MARK: - self Reference Tests
@@ -82,6 +83,62 @@ import Foundation
         try analyze(source)
     }
     
+    @Test func `detects returning the class where SELF_TYPE is expected`() throws {
+        let source = """
+        class A {
+            make() : SELF_TYPE {
+                new A
+            };
+        };
+        """
+        
+        let error = #expect(throws: Diagnostic.self) {
+            try analyze(source)
+        }
+        #expect(error?.message == "cannot convert value of type 'A' to specified type 'SELF_TYPE'")
+    }
+    
+    @Test func `validates returning self where SELF_TYPE is expected`() throws {
+        let source = """
+        class A {
+            me() : SELF_TYPE {
+                self
+            };
+            again() : SELF_TYPE {
+                me()
+            };
+        };
+        """
+        
+        try analyze(source)
+    }
+    
+    @Test func `validates SELF_TYPE conforms to its class`() throws {
+        let source = """
+        class A {
+            me() : A {
+                let x : SELF_TYPE <- self in x
+            };
+        };
+        """
+        
+        try analyze(source)
+    }
+    
+    @Test func `resolves SELF_TYPE return to the receiver type`() throws {
+        let source = """
+        class A {
+            me() : SELF_TYPE { self };
+        };
+        class B inherits A {
+            onlyB() : Int { 1 };
+            test() : Int { (new B).me().onlyB() };
+        };
+        """
+        
+        try analyze(source)
+    }
+    
 // MARK: - SELF_TYPE Variable Tests
     @Test func `validates SELF_TYPE as variable type`() throws {
         let source = """
@@ -122,6 +179,34 @@ import Foundation
         """
         
         try analyze(source)
+    }
+    
+    @Test func `inherited SELF_TYPE attribute takes the subclass type`() throws {
+        let source = """
+        class A {
+            obj : SELF_TYPE;
+        };
+        class B inherits A {
+            onlyB() : Int { 1 };
+            test() : Int { { obj <- new SELF_TYPE; obj.onlyB(); } };
+        };
+        """
+        
+        try analyze(source)
+    }
+    
+    @Test func `detects assigning the class to a SELF_TYPE attribute`() throws {
+        let source = """
+        class A {
+            obj : SELF_TYPE;
+            reset() : A { obj <- new A };
+        };
+        """
+        
+        let error = #expect(throws: Diagnostic.self) {
+            try analyze(source)
+        }
+        #expect(error?.message == "cannot assign value of type 'A' to type 'SELF_TYPE'")
     }
     
 // MARK: - Method Chaining with SELF_TYPE Tests

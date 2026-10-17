@@ -20,6 +20,24 @@ public struct ResolvedClassDecl: ResolvedDecl {
     }
 }
 
+public struct ResolvedInterfaceClassDecl: ResolvedDecl {
+    public let name: String
+    public let parent: ResolvedType?
+    public let methods: [ResolvedInterfaceFuncDecl]
+    public let decl: any Decl
+    
+    public var type: ResolvedType {
+        return ResolvedType(name: name)
+    }
+}
+
+public struct ResolvedInterfaceFuncDecl: ResolvedDecl {
+    public let name: String
+    public let type: ResolvedType
+    public let parameters: [ResolvedParameterDecl]
+    public let decl: any Decl
+}
+
 public struct ResolvedVarDecl: ResolvedDecl {
     public let name: String
     public let type: ResolvedType

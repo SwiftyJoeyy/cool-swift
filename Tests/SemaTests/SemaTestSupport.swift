@@ -41,6 +41,14 @@ func analyze(_ source: String, file: String = testFile) throws -> [Diagnostic] {
     return diagEngine.diags
 }
 
+/// Parses and type checks `source`, returning the resolved program.
+func resolve(_ source: String) throws -> ResolvedSource {
+    var (parser, diagEngine) = try CoolParser.new(source: source)
+    let sourceFile = try parser.parse()
+    return try Sema(diagnostics: diagEngine, interfaceSymbols: .test)
+        .analyze(sourceFile)
+}
+
 @discardableResult func build(_ source: String) throws -> SymbolTable {
     var (parser, _) = try CoolParser.new(source: source)
     let sourceFile = try parser.parse()

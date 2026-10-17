@@ -183,6 +183,20 @@ import Diagnostics
     }
     
     // MARK: - Inheritance Validation Tests
+    @Test(arguments: ["Int", "String", "Bool"])
+    func `detects inheriting from a basic type`(type: String) throws {
+        let error = buildError("class A inherits \(type) { };")
+        
+        #expect(error?.message == "cannot inherit from basic type '\(type)'")
+        #expect(error?.location?.line == 1)
+    }
+    
+    @Test func `allows inheriting from IO`() throws {
+        let table = try build("class Main inherits IO { };")
+        
+        #expect(try symbol("Main", in: table).superclass?.type == ResolvedType(name: "IO"))
+    }
+    
     @Test func `detects undefined parent class`() throws {
         let source = """
         class Main inherits Foo { };
@@ -282,7 +296,7 @@ import Diagnostics
     }
     
     // MARK: - Member Registration Tests
-    @Test func `registers members with their declaration index`() throws {
+    @Test func `registers members on their declaring class`() throws {
         let source = """
         class Main {
             x : Int;
@@ -294,10 +308,8 @@ import Diagnostics
         let table = try build(source)
         
         let main = try symbol("Main", in: table)
-        let expected = ["x": 0, "foo": 1, "y": 2]
-        for (name, index) in expected {
+        for name in ["x", "foo", "y"] {
             let member = try #require(main.lookup(name))
-            #expect(member.index == index)
             #expect(member.parent == main.type)
             #expect(member.decl.name.value == name)
         }
@@ -330,7 +342,6 @@ import Diagnostics
         let derived = try symbol("Derived", in: table)
         let base = ResolvedType(name: "Base")
         #expect(derived.lookup("x")?.parent == base)
-        #expect(derived.lookup("x")?.index == 0)
         #expect(derived.lookup("foo")?.parent == base)
         #expect(derived.lookup("bar")?.parent == derived.type)
     }
@@ -501,7 +512,7 @@ import Diagnostics
         }
     }
     
-    @Test func `keeps override declaration index in child class`() throws {
+    @Test func `override belongs to the child class`() throws {
         let source = """
         class Base {
             foo() : Int { 0 };
@@ -517,7 +528,6 @@ import Diagnostics
         let derived = try symbol("Derived", in: table)
         let member = derived.lookup("foo")
         #expect(member?.parent == derived.type)
-        #expect(member?.index == 1)
     }
     
     @Test func `detects override return type mismatch`() throws {

@@ -31,21 +31,32 @@ public struct Sema {
             decls.append(try typeSystem.typeCheck(symbol))
         }
         
-        return ResolvedSource(declarations: decls)
+        return ResolvedSource(
+            declarations: decls,
+            interfaceDeclarations: interfaceSymbols.resolvedDeclarations()
+        )
     }
     
-//    public func checkEntryPoint(typeSystem: TypeSystem) throws(Diagnostic) {
-//        guard let mainSymbol = typeSystem.lookup(type: .main) else {
-//            throw SemaError.missingMainClass.diagnostic()
-//        }
-//        
-//        guard let mainFunc = mainSymbol.lookup(.main)?.decl as? FuncDecl else {
-//            throw SemaError.missingMainMethod
-//                .diagnostic(at: mainSymbol.decl.location)
-//        }
-//        
-//        guard !mainFunc.parameters.parameters.isEmpty else { return }
-//        throw SemaError.mainMethodCannotHaveParameters
-//            .diagnostic(at: mainFunc.parameters.location)
-//    }
+    public func checkEntryPoint(_ source: ResolvedSource) throws(Diagnostic) {
+        let classes = Dictionary(
+            source.declarations.map({($0.type, $0)}),
+            uniquingKeysWith: { first, _ in first }
+        )
+        guard let mainClass = classes[.main] else {
+            throw SemaError.missingMainClass.diagnostic()
+        }
+        
+        var current: ResolvedClassDecl? = mainClass
+        while let decl = current {
+            if let mainFunc = decl.methods.first(where: {$0.name == "main"}) {
+                guard !mainFunc.parameters.isEmpty else { return }
+                let location = (mainFunc.decl as? FuncDecl)?.parameters.location
+                throw SemaError.mainMethodCannotHaveParameters
+                    .diagnostic(at: location ?? mainFunc.decl.location)
+            }
+            current = classes[decl.parent]
+        }
+        throw SemaError.missingMainMethod
+            .diagnostic(at: mainClass.decl.location)
+    }
 }

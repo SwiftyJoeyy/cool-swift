@@ -8,6 +8,7 @@
 import Testing
 import Foundation
 import Diagnostics
+import Sema
 
 @Suite struct ExpressionTests {
 // MARK: - Literal Tests
@@ -19,6 +20,82 @@ import Diagnostics
         """
         
         try analyze(source)
+    }
+    
+    @Test func `validates the largest integer literal`() throws {
+        let source = """
+        class Main {
+            x : Int <- 2147483647;
+        };
+        """
+        
+        try analyze(source)
+    }
+    
+    @Test func `detects integer literal overflow`() throws {
+        let source = """
+        class Main {
+            x : Int <- 2147483648;
+        };
+        """
+        
+        let error = #expect(throws: Diagnostic.self) {
+            try analyze(source)
+        }
+        #expect(error?.message == "integer literal '2147483648' overflows when stored into 'Int'")
+    }
+    
+    @Test func `resolves literals to typed values`() throws {
+        let source = """
+        class Main {
+            i() : Int { 0042 };
+            b() : Bool { true };
+            s() : String { "hi" };
+        };
+        """
+        
+        let methods = try #require(try resolve(source).declarations.first?.methods)
+        let values = methods.map { ($0.body as? ResolvedLiteralExpr)?.value }
+        
+        guard case .int(42) = values[0] else {
+            Issue.record("Expected int literal, got \(String(describing: values[0]))")
+            return
+        }
+        guard case .bool(true) = values[1] else {
+            Issue.record("Expected bool literal, got \(String(describing: values[1]))")
+            return
+        }
+        guard case .string("hi") = values[2] else {
+            Issue.record("Expected string literal, got \(String(describing: values[2]))")
+            return
+        }
+        #expect(methods.map(\.body.type) == [.int, .bool, .string])
+    }
+    
+    @Test func `resolves block type to its last expression`() throws {
+        let source = """
+        class Main {
+            foo() : String { { 1; true; "last"; } };
+        };
+        """
+        
+        let method = try #require(try resolve(source).declarations.first?.methods.first)
+        let block = try #require(method.body as? ResolvedBlockExpr)
+        #expect(block.type == .string)
+    }
+    
+    @Test func `resolves binary operators`() throws {
+        let source = """
+        class Main {
+            a() : Int { 1 + 2 };
+            b() : Bool { 1 <= 2 };
+            c() : Bool { 1 = 2 };
+        };
+        """
+        
+        let methods = try #require(try resolve(source).declarations.first?.methods)
+        let operators = methods.compactMap { ($0.body as? ResolvedOperationExpr)?.op }
+        #expect(operators == [.plus, .lessThanOrEqual, .equal])
     }
     
     @Test func `validates string literal`() throws {

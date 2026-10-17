@@ -14,6 +14,12 @@ protocol Scope {
     func lookup(member: String) throws(Diagnostic) -> ScopedMember?
 }
 
+extension Scope {
+    var selfType: ResolvedType {
+        return ResolvedType(name: baseType.name, isSelfType: true)
+    }
+}
+
 struct ScopedMember {
     let name: String
     let type: ResolvedType
@@ -36,7 +42,7 @@ struct ClassScope: Scope {
         guard let symbolMember = symbol.lookup(member) else {
             return nil
         }
-        let type = try typeSystem.checkType(symbolMember.decl.type, base: symbolMember.parent)
+        let type = try typeSystem.checkType(symbolMember.decl.type, base: selfType)
         return ScopedMember(
             name: symbolMember.decl.name.value,
             type: type,
@@ -76,8 +82,8 @@ struct LetScope: Scope {
     func lookup(member: String) throws(Diagnostic) -> ScopedMember? {
         if let decl = environment.lookup(member) {
             return ScopedMember(
-                name: decl.name.value,
-                type: decl.type.resolved,
+                name: decl.name,
+                type: decl.type,
                 refType: .letBinding
             )
         }
@@ -85,13 +91,13 @@ struct LetScope: Scope {
     }
     
     class Environment {
-        private var bindings = [String: VarDecl]()
+        private var bindings = [String: ResolvedVarDecl]()
         
-        func insert(_ binding: VarDecl) {
-            guard bindings[binding.name.value] == nil else { return }
-            bindings[binding.name.value] = binding
+        func insert(_ binding: ResolvedVarDecl) {
+            guard bindings[binding.name] == nil else { return }
+            bindings[binding.name] = binding
         }
-        func lookup(_ name: String) -> VarDecl? {
+        func lookup(_ name: String) -> ResolvedVarDecl? {
             return bindings[name]
         }
     }

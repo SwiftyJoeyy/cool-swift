@@ -7,6 +7,7 @@
 
 import Testing
 import Foundation
+import Sema
 import Diagnostics
 
 @Suite struct MemberAccessTests {
@@ -199,6 +200,42 @@ import Diagnostics
             test() : Int {
                 (new Derived)@Base.foo()
             };
+        };
+        """
+        
+        try analyze(source)
+    }
+    
+    @Test func `resolves static dispatch calls with a static dispatch base`() throws {
+        let source = """
+        class Base {
+            foo() : Int { 1 };
+        };
+        class Main inherits Base {
+            foo() : Int { 2 };
+            test() : Int { self@Base.foo() };
+        };
+        """
+        
+        let main = try #require(try resolve(source).declarations.first { $0.name == "Main" })
+        let test = try #require(main.methods.first { $0.name == "test" })
+        let call = try #require(test.body as? ResolvedFuncCallExpr)
+        guard case .staticDispatch(let dispatch) = call.base else {
+            Issue.record("Expected a static dispatch base, got \(call.base)")
+            return
+        }
+        #expect(dispatch.type.name == "Base")
+        #expect(dispatch.base.type.name == "Main")
+    }
+    
+    @Test func `static dispatch SELF_TYPE result is the receiver type`() throws {
+        let source = """
+        class A {
+            me() : SELF_TYPE { self };
+        };
+        class B inherits A {
+            onlyB() : Int { 1 };
+            test() : Int { (new B)@A.me().onlyB() };
         };
         """
         
