@@ -19,7 +19,8 @@ let package = Package(
         Diagnostics.product,
         Lexer.product,
         Parser.product,
-        Sema.product
+        Sema.product,
+        CoreModule.product
     ],
     dependencies: [
         ArgumentParser.package
@@ -38,6 +39,10 @@ let package = Package(
         Sema.target,
         Sema.tests,
         
+        CoreModule.target,
+        CoreModule.embedder,
+        CoreModule.embedPlugin,
+        
         TestSupport.target,
         
         .executableTarget(
@@ -46,9 +51,9 @@ let package = Package(
                 ArgumentParser.dependency,
                 Lexer.dependency,
                 Sema.dependency,
-                Parser.dependency
+                Parser.dependency,
+                CoreModule.dependency
             ],
-            resources: [.copy("Resources")],
             swiftSettings: upcomingFeatures
         ),
     ]
@@ -208,7 +213,8 @@ enum Sema {
             name: "SemaTests",
             dependencies: [
                 Sema.dependency,
-                TestSupport.dependency
+                TestSupport.dependency,
+                CoreModule.dependency
             ],
             resources: [.copy("Resources")],
             swiftSettings: upcomingFeatures
@@ -227,6 +233,43 @@ enum TestSupport {
                 Parser.dependency
             ],
             path: "Tests/TestSupport"
+        )
+    }
+}
+
+enum CoreModule {
+    static let dependency: Target.Dependency = "CoreModule"
+    static var product: Product {
+        .library(name: "CoreModule", targets: ["CoreModule"])
+    }
+    static var target: Target {
+        .target(
+            name: "CoreModule",
+            dependencies: [
+                AST.dependency,
+                Diagnostics.dependency,
+                Lexer.dependency,
+                Parser.dependency
+            ],
+            exclude: ["Resources"],
+            swiftSettings: upcomingFeatures,
+            plugins: ["EmbedResources"]
+        )
+    }
+    
+    /// Compiles `Resources` into the binary, so `coolc` runs without a
+    /// resource bundle next to it.
+    static var embedPlugin: Target {
+        .plugin(
+            name: "EmbedResources",
+            capability: .buildTool(),
+            dependencies: ["ResourceEmbedder"]
+        )
+    }
+    static var embedder: Target {
+        .executableTarget(
+            name: "ResourceEmbedder",
+            swiftSettings: upcomingFeatures
         )
     }
 }

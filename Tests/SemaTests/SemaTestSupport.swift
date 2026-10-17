@@ -7,6 +7,7 @@
 
 import Foundation
 import AST
+import CoreModule
 import Diagnostics
 import Parser
 import TestSupport
@@ -15,18 +16,7 @@ import TestSupport
 extension ModuleInterfaceSymbols {
     nonisolated(unsafe) static let test: ModuleInterfaceSymbols = {
         let loader = ModuleInterfaceSymbols()
-        let url = Bundle.module.url(
-            forResource: "Core",
-            withExtension: "clmodule",
-            subdirectory: "Resources"
-        )!
-        let source = try! String(contentsOf: url, encoding: .utf8)
-        
-        var (parser, _) = try! CoolParser.new(
-            source: source,
-            file: "Core.clmodule"
-        )
-        let file = try! parser.parseInterface()
+        let file = try! CoreModule.interface(using: MockDiagEngine())
         try! loader.load(file)
         return loader
     }()

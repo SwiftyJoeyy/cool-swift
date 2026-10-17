@@ -12,6 +12,7 @@ import Sema
 import Diagnostics
 import Parser
 import AST
+import CoreModule
 
 @main
 struct CoolCommand: ParsableCommand {
@@ -72,19 +73,6 @@ enum ModuleInterfaceParser {
     static func parse(
         using diagnostics: some DiagnosticsEngine
     ) throws -> InterfaceFile {
-        let bundle = Bundle.module
-        guard let path = bundle.path(forResource: "Core", ofType: "clmodule", inDirectory: "Resources") else {
-            throw NSError(domain: "", code: 0)
-        }
-        
-        let contents = try String(contentsOfFile: path, encoding: .utf8)
-        
-        let lexer = CoolLexer(contents, file: path)
-        var parser = try CoolParser(
-            lexemes: Lexemes(lexer: lexer),
-            diagnostics: diagnostics
-        )
-        
-        return try parser.parseInterface()
+        return try CoreModule.interface(using: diagnostics)
     }
 }
