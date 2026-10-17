@@ -53,9 +53,12 @@ let package = Package(
             name: "CoolSwift",
             dependencies: [
                 ArgumentParser.dependency,
+                Basic.dependency,
+                Diagnostics.dependency,
                 Lexer.dependency,
-                Sema.dependency,
                 Parser.dependency,
+                Sema.dependency,
+                CodeGen.dependency,
                 CoreModule.dependency
             ],
             swiftSettings: upcomingFeatures

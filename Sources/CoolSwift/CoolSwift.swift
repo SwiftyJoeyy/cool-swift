@@ -1,18 +1,19 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
-// 
-// Swift Argument Parser
-// https://swiftpackageindex.com/apple/swift-argument-parser/documentation
+//
+//  CoolSwift.swift
+//  CoolSwift
+//
+//  Created by Joe Maghzal on 17/10/2026.
+//
 
 import ArgumentParser
+import Basic
+import CodeGen
+import CoreModule
+import Diagnostics
 import Foundation
 import Lexer
-import Basic
-import Sema
-import Diagnostics
 import Parser
-import AST
-import CoreModule
+import Sema
 
 @main
 struct CoolCommand: ParsableCommand {
@@ -24,55 +25,77 @@ struct CoolCommand: ParsableCommand {
     @Argument(help: "The source file to compile", transform: URL.init(fileURLWithPath:))
     var input: URL
     
-    @Option(name: .shortAndLong, help: "Write output to <file>")
-    var output: String?
+    @Option(
+        name: .shortAndLong,
+        help: "Write output to <file>",
+        transform: URL.init(fileURLWithPath:)
+    )
+    var output: URL?
     
-    @Flag(name: .short, help: "Emit LLVM IR instead of an executable")
-    var emitIR: Bool = false
+    @Flag(name: [.short, .customLong("emit-ir")], help: "Emit LLVM IR instead of an executable")
+    var emitIR = false
     
     mutating func run() throws {
-//        let outputURL: URL
-//        if emitIR {
-//            outputURL = input.deletingPathExtension().appendingPathExtension("ll")
-//        } else {
-//            outputURL = input.deletingPathExtension().appendingPathExtension("ll")
-//        }
+        let path = input.path(percentEncoded: false)
+        let errorOutput = StandardErrorOutput()
+        let sourceManager = SourceManager()
+        do {
+            try sourceManager.registerFile(path)
+        } catch {
+            errorOutput.write("error: cannot read '\(path)'\n")
+            throw ExitCode.failure
+        }
+        let diagnostics = CoolDiagnosticsEngine(
+            sourceManager: sourceManager,
+            output: errorOutput
+        )
         
-//        let sourceManager = SourceManager()
-//        try sourceManager.registerFile(input.path(percentEncoded: false))
-//        
-//        let diagnostics = CoolDiagnosticsEngine(sourceManager: sourceManager)
-//        
-//        let moduleInterface = ModuleInterfaceSymbols()
-//        let interfaceFile = try ModuleInterfaceParser.parse(using: diagnostics)
-//        try moduleInterface.load(interfaceFile)
-//    
-//        let file = sourceManager.sourceFiles.first!
-//        let lexer = CoolLexer(file.contents, file: file.path)
-//        var parser = try CoolParser(
-//            lexemes: Lexemes(lexer: lexer),
-//            diagnostics: diagnostics
-//        )
-//        
-//        let sema = Sema(
-//            diagnostics: diagnostics,
-//            interfaceSymbols: moduleInterface
-//        )
-//        let typeSystem = try sema.analyze(parser.parse())
-//        try sema.checkEntryPoint(typeSystem: typeSystem)
-//        let irGenerator = IRGenerator(
-//            typeSystem: typeSystem
-//        )
-//        let data = irGenerator.generate().data(using: .utf8)
-//        try data?.write(to: outputURL)
-//        
+        let ir: String
+        do {
+            ir = try generateIR(at: path, sourceManager: sourceManager, diagnostics: diagnostics)
+        } catch let diagnostic as Diagnostic {
+            diagnostics.insert(diagnostic)
+            diagnostics.emit()
+            throw ExitCode.failure
+        }
+        
+        if emitIR {
+            let outputURL = output ?? input.deletingPathExtension().appendingPathExtension("ll")
+            try ir.write(to: outputURL, atomically: true, encoding: .utf8)
+        } else {
+            let compiler = ClangCompiler(runtimeSource: CoreModule.runtimeSource)
+            try compiler.compile(ir, to: output ?? input.deletingPathExtension())
+        }
     }
-}
-
-enum ModuleInterfaceParser {
-    static func parse(
-        using diagnostics: some DiagnosticsEngine
-    ) throws -> InterfaceFile {
-        return try CoreModule.interface(using: diagnostics)
+    
+    private func generateIR(
+        at path: String,
+        sourceManager: SourceManager,
+        diagnostics: CoolDiagnosticsEngine
+    ) throws -> String {
+        let interfaceSymbols = ModuleInterfaceSymbols()
+        try interfaceSymbols.load(CoreModule.interface(using: diagnostics))
+        
+        let contents = sourceManager.sourceFiles.first { $0.path == path }?.contents ?? ""
+        var parser = try CoolParser(
+            lexemes: Lexemes(lexer: CoolLexer(contents, file: path)),
+            diagnostics: diagnostics
+        )
+        let sourceFile = try parser.parse()
+        try stopIfErrors(in: diagnostics)
+        
+        let sema = Sema(diagnostics: diagnostics, interfaceSymbols: interfaceSymbols)
+        let resolved = try sema.analyze(sourceFile)
+        try sema.checkEntryPoint(resolved)
+        try stopIfErrors(in: diagnostics)
+        
+        return IRGenerator(source: resolved).generate()
+    }
+    
+    /// Parsing recovers from some errors, so they're collected instead of thrown.
+    private func stopIfErrors(in diagnostics: CoolDiagnosticsEngine) throws {
+        guard diagnostics.hasErrors else { return }
+        diagnostics.emit()
+        throw ExitCode.failure
     }
 }
