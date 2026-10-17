@@ -8,6 +8,7 @@
 import Testing
 import Foundation
 import AST
+import Basic
 import Diagnostics
 @testable import Parser
 
@@ -365,6 +366,23 @@ import Diagnostics
             _ = try parse("(1 + 2")
         }
         #expect(error?.id == ParserError.expectedSymbol(.rightParen).id)
+    }
+    
+    @Test(arguments: [
+        ("1 +", "+", 3),
+        ("1 * )", "*", 3),
+        ("x <-", "<-", 3),
+        ("not", "not", 1),
+        ("~ )", "~", 1),
+        ("isvoid", "isvoid", 1)
+    ])
+    func `reports missing operand at the operator`(source: String, op: String, column: Int) throws {
+        let error = #expect(throws: Diagnostic.self) {
+            _ = try parse(source)
+        }
+        #expect(error?.id == ParserError.expectedOperand(after: op).id)
+        #expect(error?.message == "Expected expression after '\(op)'")
+        #expect(error?.location?.column == column)
     }
     
     @Test func `reports error on unexpected token`() throws {

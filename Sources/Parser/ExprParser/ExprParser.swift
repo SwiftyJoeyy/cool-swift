@@ -23,6 +23,32 @@ struct ExprParser {
         
         return left
     }
+    
+    static func parseOperand(
+        of op: Token,
+        from parser: inout CoolParser,
+        minPrecedence: Precedence
+    ) throws(Diagnostic) -> any Expr {
+        guard parser.currentToken.kind.startsExpression else {
+            throw ParserError.expectedOperand(after: op.kind.text)
+                .diagnostic(at: op.location)
+        }
+        return try parse(from: &parser, minPrecedence: minPrecedence)
+    }
+}
+
+extension TokenKind {
+    fileprivate var startsExpression: Bool {
+        switch self {
+            case .identifier, .integerLiteral, .stringLiteral, .leftParen, .leftBrace, .tilde:
+                return true
+            case .keyword(let keyword):
+                let keywords: [Keyword] = [.if, .while, .case, .let, .not, .isvoid, .new, .true, .false]
+                return keywords.contains(keyword)
+            default:
+                return false
+        }
+    }
 }
 
 extension ExprParser {

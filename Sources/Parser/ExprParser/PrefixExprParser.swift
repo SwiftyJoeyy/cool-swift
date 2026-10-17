@@ -31,13 +31,13 @@ extension ExprParser {
             case .keyword(.not):
                 try parser.advance()
                 return NotExpr(
-                    expression: try parse(from: &parser, minPrecedence: .unary),
+                    expression: try parseOperand(of: token, from: &parser, minPrecedence: .unary),
                     location: token.location
                 )
             case .keyword(.isvoid):
                 try parser.advance()
                 return IsVoidExpr(
-                    expression: try parse(from: &parser, minPrecedence: .unary),
+                    expression: try parseOperand(of: token, from: &parser, minPrecedence: .unary),
                     location: token.location
                 )
             case .keyword(.new):
@@ -57,7 +57,7 @@ extension ExprParser {
             case .tilde:
                 try parser.advance()
                 return ComplementExpr(
-                    expression: try parse(from: &parser, minPrecedence: .unary),
+                    expression: try parseOperand(of: token, from: &parser, minPrecedence: .unary),
                     location: token.location
                 )
                 

@@ -21,7 +21,8 @@ extension ExprParser {
         switch opToken.kind {
             case .plus, .minus, .star, .slash, .lessThan, .lessThanOrEqual, .equal:
                 try parser.advance()
-                let right = try parse(
+                let right = try parseOperand(
+                    of: opToken,
                     from: &parser,
                     minPrecedence: precedence.higher
                 )
@@ -34,7 +35,8 @@ extension ExprParser {
                 
             case .assign:
                 try parser.advance()
-                let right = try parse(
+                let right = try parseOperand(
+                    of: opToken,
                     from: &parser,
                     minPrecedence: precedence
                 )

@@ -25,6 +25,7 @@ public enum ParserError {
     
 // MARK: - Expr
     case unexpectedExpression
+    case expectedOperand(after: String)
     case expectedMemberName
     case expectedType
     case expectedSymbol(SyntaxSymbol)
@@ -58,6 +59,8 @@ extension ParserError: DiagnosticConvertible {
             return "Expected parameter name"
         case .unexpectedExpression:
             return "Unexpected expression"
+        case .expectedOperand(let op):
+            return "Expected expression after '\(op)'"
         case .expectedMemberName:
             return "Expected member name"
         case .expectedType:
