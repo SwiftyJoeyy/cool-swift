@@ -30,7 +30,9 @@ public class SourceManager: SourceManageable {
     public func registerFile(_ filePath: String) throws(SourceError) {
         do {
             let contents = try String(contentsOfFile: filePath, encoding: .utf8)
-            let lines = contents.split(separator: "\n").map({String($0)})
+            let lines = contents
+                .split(separator: "\n", omittingEmptySubsequences: false)
+                .map({String($0)})
             files[filePath] = File(path: filePath, contents: contents, lines: lines)
         } catch {
             throw .failedToRegisterFile(error)
@@ -38,7 +40,12 @@ public class SourceManager: SourceManageable {
     }
     
     public func line(at location: SourceLocation) -> String? {
-        files[location.file]?.lines[location.line - 1]
+        guard let lines = files[location.file]?.lines,
+              lines.indices.contains(location.line - 1)
+        else {
+            return nil
+        }
+        return lines[location.line - 1]
     }
 }
 
